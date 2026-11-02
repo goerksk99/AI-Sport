@@ -85,6 +85,7 @@ export type WorkoutSession = {
   workoutId: string;
   name: string;
   startedAt: string;
+  trainingDate?: string;
   completedAt?: string;
   updatedAt: string;
   performanceUpdatedAt?: string;
@@ -111,7 +112,19 @@ export type CoachRecommendation = {
   tone: "neutral" | "positive";
   adjustment?: { exerciseId: string; kind: "reps" | "weight"; value: number };
 };
+export type CalendarSchedule = {
+  planId: string;
+  from: string;
+  weekdays: number[];
+};
+export type CalendarOverride = {
+  planId: string;
+  kind: "rest" | "workout";
+  workoutId?: string;
+};
 export type AppData = {
+  calendarSchedules?: CalendarSchedule[];
+  calendarOverrides?: Record<string, CalendarOverride>;
   version: 1;
   profile: UserProfile | null;
   plan: WorkoutPlan | null;

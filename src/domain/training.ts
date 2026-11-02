@@ -8,6 +8,7 @@ import {
   ExercisePerformance,
   DocumentationMode,
 } from "./types";
+import { dateKey, isDateKey } from "./dates";
 import { exercises, exerciseById } from "../data/exercises";
 export const uid = () =>
   `${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 10)}`;
@@ -136,8 +137,16 @@ export function startSession(
   plan: WorkoutPlan,
   workoutId: string,
   history: WorkoutSession[],
-  options: { posthoc?: boolean } = {},
+  options: { posthoc?: boolean; trainingDate?: string } = {},
 ): WorkoutSession {
+  if (
+    options.trainingDate &&
+    (!isDateKey(options.trainingDate) ||
+      options.trainingDate > dateKey(new Date()))
+  )
+    throw new Error(
+      "Ein tatsächliches Training kann nicht in der Zukunft liegen.",
+    );
   const w = plan.workouts.find((x) => x.id === workoutId);
   if (!w) throw new Error("Training nicht gefunden");
   const now = new Date().toISOString();
@@ -147,6 +156,7 @@ export function startSession(
     workoutId: w.id,
     name: w.name,
     startedAt: now,
+    trainingDate: options.trainingDate,
     updatedAt: now,
     status: "draft",
     documentationMode: "quick",
@@ -223,7 +233,9 @@ export function record(s: WorkoutSession): ProgressRecord {
   );
   return {
     sessionId: s.id,
-    date: s.completedAt || s.startedAt,
+    date: s.trainingDate
+      ? s.trainingDate + "T12:00:00"
+      : s.completedAt || s.startedAt,
     sets: confirmed.length,
     volume: confirmed.reduce(
       (sum, x) => sum + (x.weighted ? (x.weight ?? 0) * x.reps : 0),

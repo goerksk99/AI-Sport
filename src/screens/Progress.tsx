@@ -20,7 +20,7 @@ export function Progress() {
   const { data } = useStore();
   const [exercise, setExercise] = useState("");
   const history = [...data.sessions].sort((a, b) =>
-    (a.completedAt || "").localeCompare(b.completedAt || ""),
+    record(a).date.localeCompare(record(b).date),
   );
   const ids = Array.from(
     new Set(
@@ -55,7 +55,7 @@ export function Progress() {
         return sets.length
           ? [
               {
-                date: x.completedAt!,
+                date: record(x).date,
                 value: Math.max(
                   ...sets.map((s) => (ex?.weighted ? s.weight || 0 : s.reps)),
                 ),
@@ -70,7 +70,7 @@ export function Progress() {
     1,
     history.length
       ? Math.ceil(
-          (Date.now() - Date.parse(history[0].startedAt)) / (7 * 86400000),
+          (Date.now() - Date.parse(record(history[0]).date)) / (7 * 86400000),
         )
       : 1,
   );

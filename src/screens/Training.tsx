@@ -48,6 +48,12 @@ export function Training() {
         title="Ein klarer Plan. Dein Spielraum."
         description={`${p.days} Einheiten pro Woche · ${goals[p.goal]}`}
       />
+      <Button
+        label="Kalender & Ruhetage"
+        icon="calendar"
+        secondary
+        onPress={() => router.navigate("/calendar")}
+      />
       <Card>
         <View style={s.row}>
           <Icon name="sliders" color={C.accent} />

@@ -1,4 +1,5 @@
 import React, { useState } from "react";
+import { router } from "expo-router";
 import { View } from "react-native";
 import { useStore } from "../storage/store";
 import { Onboarding, goals } from "../components/Onboarding";
@@ -93,6 +94,12 @@ export function Profile() {
           onPress={() => setEdit(true)}
         />
       </Card>
+      <Button
+        label="Trainingstage planen"
+        icon="calendar"
+        secondary
+        onPress={() => router.navigate("/calendar")}
+      />
       <Card>
         <Assessments
           profile={p}
@@ -118,7 +125,7 @@ export function Profile() {
         </T>
       </Card>
       <T muted style={{ fontSize: 12 }}>
-        PULS · Prototyp 1.1. Daten sind lokal und nicht verschlüsselt. Das
+        PULS · Prototyp 1.2. Daten sind lokal und nicht verschlüsselt. Das
         Löschen von App- oder Browserdaten entfernt auch deine Trainings. Keine
         Cloud-Synchronisierung.
       </T>

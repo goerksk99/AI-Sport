@@ -71,7 +71,8 @@ export function Shell({ children }: { children: React.ReactNode }) {
       }
     >
       {tabs.map((t) => {
-        const active = path === t.path;
+        const active =
+          path === t.path || (path === "/calendar" && t.path === "/training");
         return (
           <Pressable
             key={t.path}

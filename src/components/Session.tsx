@@ -10,6 +10,7 @@ import {
   resolveExercise,
   exerciseSummary,
 } from "../domain/training";
+import { localDate } from "../domain/dates";
 import { effortHint } from "../domain/preferences";
 import { ExerciseCard } from "./ExerciseCard";
 import { Heading } from "../screens/Heading";
@@ -126,6 +127,12 @@ export function Session() {
         <T muted style={{ fontSize: 12 }}>
           {effortHint(data.profile?.trainingStyle)}
         </T>
+        {session.trainingDate && (
+          <T muted style={{ fontSize: 12 }}>
+            Trainingstag:{" "}
+            {localDate(session.trainingDate).toLocaleDateString("de-DE")}
+          </T>
+        )}
         <T style={{ color: C.accent, fontSize: 12 }}>
           {metrics.sets} bestätigte Sätze · {metrics.assumedSets} angenommen ·{" "}
           {metrics.durationMinutes === null

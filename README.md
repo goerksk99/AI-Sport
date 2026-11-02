@@ -2,6 +2,18 @@
 
 React Native, Expo SDK 55, Expo Router und TypeScript. Deutsch, Dark Mode, lokale Speicherung. Kein Konto, kein Server und keine kostenpflichtige API. Der Coach verwendet transparente Regeln, keine echte KI.
 
+## Neu in 1.2.0: Kalender
+
+Über **Heute → Kalender öffnen**, **Training → Kalender & Ruhetage** oder **Profil → Trainingstage planen** erreichst du die Monatsansicht. Grün markiert geplante Trainings, Grau Ruhetage; ein Häkchen zeigt tatsächlich gespeicherte Einheiten. Die Wochenübersicht auf Heute verwendet dieselbe Planung.
+
+Ohne zusätzliche Pflichtangaben wird ein Rhythmus vorgegeben: 2 Tage Mo/Do, 3 Tage Mo/Mi/Fr, 4 Tage Mo/Di/Do/Sa, 5 Tage Mo/Di/Mi/Fr/Sa. Die Trainingstage werden in dieser Reihenfolge mit den Einheiten des aktuellen Plans belegt. Unter **Trainingstage ändern** wählst du genau die im Profil festgelegte Anzahl. Neue Wochenregeln gelten ab ihrem Speicherdatum. Die frühere Planung desselben Plans bleibt für ältere Daten erhalten.
+
+Einzelne Kalendertage können separat mit einer anderen Einheit oder als Ruhetag belegt werden. **Wochenplan übernehmen** entfernt diese Tagesausnahme. Ausnahmen haben Vorrang vor dem Wochenrhythmus. Eine Regeneration des Trainingsplans erzeugt neue Plan-IDs; alte Ausnahmen werden nicht auf andere Einheiten übertragen. Bestehende absolvierte Trainings bleiben unabhängig davon sichtbar.
+
+Vergangene Tage können über **Training für diesen Tag nachtragen** dokumentiert werden. Das gewählte lokale Kalenderdatum wird gesondert gespeichert und für Historie, Wochenzählung und Diagramme verwendet. Die tatsächliche Eingabezeit bleibt erhalten; es wird keine Trainingsdauer erfunden. Zukünftige Tage sind planbar, aber nicht als absolvierte Einheiten erfassbar. Ein laufender Entwurf wird nicht überschrieben.
+
+Kalenderdaten werden lokal und rückwärtskompatibel gespeichert. Es gibt keine automatische Google-/Apple-Kalendersynchronisierung und noch keine Erinnerungen oder Benachrichtigungen.
+
 ## Neu in 1.1.0
 
 Der normale Ablauf braucht keine Satzeingaben:
@@ -19,7 +31,7 @@ Eine Sammelaktion erhält bereits bestätigte, geänderte und ausgelassene Sätz
 
 ## Auf dem Handy aktualisieren
 
-Android-Paket: `com.aisport.puls` · Version **1.1.0** · **versionCode 2** · Android ab 7.0 (API 24) · ARM64 und ARMv7.
+Android-Paket: `com.aisport.puls` · Version **1.2.0** · **versionCode 3** · Android ab 7.0 (API 24) · ARM64 und ARMv7.
 
 Die neue Test-APK direkt über die bestehende App installieren. **Nicht vorher deinstallieren oder App-Daten löschen**, sonst gehen lokale Trainings verloren. Paketname und Entwicklungsschlüssel werden beibehalten; die Zertifikate der alten APK und des Builds werden beim Bereitstellen verglichen. Es handelt sich um eine private Testversion, nicht um einen Store-Release. Ein erfolgreicher Build und eine geprüfte Signatur ersetzen keinen echten Gerätetest.
 
@@ -129,3 +141,9 @@ npm run build:android:apk
 Ergebnis: `artifacts/PULS-Android-Test.apk`. Das Skript generiert `android/` aus der Expo-Konfiguration. APKs, generierte native Verzeichnisse und Signierschlüssel sind vom Git-Repository ausgeschlossen. In eingeschränkten Netzwerken werden die Paketquellen einschließlich `repo.reactnative.dev` benötigt; bestehende Proxy- und TLS-Verifikation beibehalten.
 
 Die private APK verwendet den öffentlichen Entwicklungsschlüssel des Expo-Templates. Für einen späteren Store-Release sind eine eigene geschützte Signieridentität und eine separate Release-Pipeline erforderlich. Ernährung, Abos und Werbung werden in dieser Version nicht implementiert.
+
+## PC-Paket erstellen
+
+`npm run package:pc` baut die Browser-App und legt unter `artifacts/PULS-PC-<Version>` eine startbereite Browser-Version mit Windows-Startdatei ab. Node.js ab 22 muss auf dem PC vorhanden sein; npm-Abhängigkeiten oder Expo werden für die Nutzung dieses Pakets nicht benötigt. Das Startprogramm bindet ausschließlich an `127.0.0.1:4173`. Dies ist keine native Windows-EXE.
+
+PC-Updates in einen neuen Ordner entpacken und das alte PULS-Startfenster zuerst schließen. Im selben Browser unter derselben lokalen Adresse bleiben die vorhandenen Daten verfügbar. Kein Privatmodus und keine Browserdaten löschen. PC- und Handy-Daten werden weiterhin nicht synchronisiert.

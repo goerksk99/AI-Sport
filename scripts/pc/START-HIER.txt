@@ -1,0 +1,17 @@
+PULS {{VERSION}} fuer Windows-PC
+
+1. Die ZIP-Datei vollstaendig entpacken: Rechtsklick > Alle extrahieren.
+2. Falls noch nicht vorhanden: Node.js LTS ab Version 22 von https://nodejs.org installieren.
+3. Im entpackten Ordner START-PULS.cmd doppelklicken.
+4. PULS oeffnet sich im Standardbrowser. Falls nicht, http://127.0.0.1:4173 aufrufen.
+5. Das Startfenster offen lassen. Zum Beenden Strg+C druecken.
+
+Keine npm-Installation und keine Expo-Anmeldung erforderlich. Die fertige App ist enthalten. Nach der einmaligen Node.js-Installation funktionieren die Trainingsfunktionen offline, solange der lokale Server laeuft.
+
+Die Trainingsdaten werden im verwendeten Browser unter dieser lokalen Adresse gespeichert. Benutze denselben Browser ohne Privatmodus, um sie wiederzufinden. Das Loeschen von Browserdaten entfernt auch deine Trainings. Nicht parallel mehrere Fenster mit verschiedenen App-Staenden bearbeiten.
+
+PC- und Handy-Daten sind getrennt. Es gibt noch keine Synchronisierung oder automatische Datenuebernahme.
+
+Dies ist eine Browser-Version mit lokalem Startprogramm, keine native Windows-EXE. Sie ist nur auf diesem Rechner erreichbar; der Server bindet ausschliesslich an 127.0.0.1. Es werden keine Projektdateien oder Zugangsdaten benoetigt.
+
+Auch auf macOS/Linux kann die App mit installiertem Node.js ueber 'node server.mjs' gestartet und die angezeigte Browseradresse geoeffnet werden.

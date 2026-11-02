@@ -513,3 +513,115 @@ test("Darstellungen vereinfachen die Oberfläche und behalten dieselben Leistung
   ).toBeVisible();
   expect((await load(page)).draft.exercises).toEqual(before);
 });
+
+test("Kalender: Trainings- und Ruhetage, Tagesänderung und Wiederherstellung", async ({
+  page,
+}) => {
+  await page.clock.install({ time: new Date("2026-11-02T12:00:00+01:00") });
+  await onboarding(page);
+  await page
+    .getByRole("button", { name: "Kalender öffnen", exact: true })
+    .click();
+  await expect(
+    page.getByRole("button", { name: "2026-11-02: Training", exact: true }),
+  ).toBeVisible();
+  await page
+    .getByRole("button", { name: "2026-11-03: Ruhetag", exact: true })
+    .click();
+  await expect(page.getByText("Ruhetag", { exact: true })).toBeVisible();
+  await page.getByRole("button", { name: "Ganzkörper A", exact: true }).click();
+  await expect(
+    page.getByRole("button", { name: "2026-11-03: Training", exact: true }),
+  ).toBeVisible();
+  await page
+    .getByRole("button", { name: "Trainingstage ändern", exact: true })
+    .click();
+  for (const label of ["Mo", "Mi", "Fr", "Di", "Do", "Sa"])
+    await page.getByRole("button", { name: label, exact: true }).click();
+  await page
+    .getByRole("button", { name: "Wochenrhythmus speichern", exact: true })
+    .click();
+  await page.reload();
+  await expect(
+    page.getByRole("button", { name: "2026-11-03: Training", exact: true }),
+  ).toBeVisible();
+  await page
+    .getByRole("button", { name: "2026-11-05: Training", exact: true })
+    .click();
+  await page
+    .getByRole("button", { name: "Als Ruhetag planen", exact: true })
+    .click();
+  await expect(
+    page.getByRole("button", { name: "2026-11-05: Ruhetag", exact: true }),
+  ).toBeVisible();
+  await page
+    .getByRole("button", { name: "Wochenplan übernehmen", exact: true })
+    .click();
+  await expect(
+    page.getByRole("button", { name: "2026-11-05: Training", exact: true }),
+  ).toBeVisible();
+  await page.screenshot({
+    path: "test-results/calendar-mobile.png",
+    fullPage: true,
+  });
+});
+
+test("Kalender: vergangenes Training am richtigen Tag eintragen und Leistungen erhalten", async ({
+  page,
+}) => {
+  await page.clock.install({ time: new Date("2026-11-02T12:00:00+01:00") });
+  await onboarding(page);
+  await page
+    .getByRole("button", { name: "Kalender öffnen", exact: true })
+    .click();
+  await page
+    .getByRole("button", { name: "2026-11-01: Ohne Plan", exact: true })
+    .click();
+  await page.getByRole("button", { name: "Ganzkörper A", exact: true }).click();
+  await page
+    .getByRole("button", {
+      name: "Training für diesen Tag nachtragen",
+      exact: true,
+    })
+    .click();
+  await expect(
+    page.getByText("Trainingstag: 1.11.2026", { exact: true }),
+  ).toBeVisible();
+  await page
+    .getByRole("button", {
+      name: "Nur Training als absolviert speichern",
+      exact: true,
+    })
+    .click();
+  await history(page);
+  let d = await load(page);
+  expect(d.sessions[0].trainingDate).toBe("2026-11-01");
+  expect(d.sessions[0].durationUnknown).toBeTruthy();
+  await page.getByRole("tab", { name: "Training", exact: true }).click();
+  await page
+    .getByRole("button", { name: "Kalender & Ruhetage", exact: true })
+    .click();
+  await page
+    .getByRole("button", {
+      name: "2026-11-01: Training, absolviert",
+      exact: true,
+    })
+    .click();
+  await expect(
+    page
+      .getByText("An diesem Tag absolviert", { exact: true })
+      .filter({ visible: true }),
+  ).toBeVisible();
+  await page
+    .getByRole("button", { name: "Als Ruhetag planen", exact: true })
+    .click();
+  await expect(
+    page.getByRole("button", {
+      name: "2026-11-01: Ruhetag, absolviert",
+      exact: true,
+    }),
+  ).toBeVisible();
+  d = await load(page);
+  expect(d.sessions).toHaveLength(1);
+  expect(d.sessions[0].trainingDate).toBe("2026-11-01");
+});

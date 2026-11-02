@@ -1,4 +1,5 @@
 import { AppData } from "../domain/types";
+import { isDateKey } from "../domain/dates";
 import { exercises } from "../data/exercises";
 const object = (v: unknown): v is Record<string, unknown> =>
   v !== null && typeof v === "object" && !Array.isArray(v);
@@ -55,6 +56,7 @@ function session(v: unknown, status: "draft" | "completed"): boolean {
     text(v.workoutId) &&
     text(v.name) &&
     time(v.startedAt) &&
+    (v.trainingDate === undefined || isDateKey(v.trainingDate)) &&
     time(v.updatedAt) &&
     (v.performanceUpdatedAt === undefined || time(v.performanceUpdatedAt)) &&
     v.status === status &&
@@ -94,6 +96,37 @@ export function parseData(raw: string): AppData {
     !unique(d.sessions) ||
     !d.sessions.every((s) => session(s, "completed")) ||
     (d.draft !== null && !session(d.draft, "draft"))
+  )
+    return invalid();
+  if (
+    d.calendarSchedules !== undefined &&
+    (!Array.isArray(d.calendarSchedules) ||
+      !d.calendarSchedules.every(
+        (s) =>
+          object(s) &&
+          text(s.planId) &&
+          isDateKey(s.from) &&
+          Array.isArray(s.weekdays) &&
+          s.weekdays.length >= 2 &&
+          s.weekdays.length <= 5 &&
+          new Set(s.weekdays).size === s.weekdays.length &&
+          s.weekdays.every(
+            (n) =>
+              typeof n === "number" && Number.isInteger(n) && n >= 0 && n < 7,
+          ),
+      ))
+  )
+    return invalid();
+  if (
+    d.calendarOverrides !== undefined &&
+    (!object(d.calendarOverrides) ||
+      !Object.entries(d.calendarOverrides).every(
+        ([key, v]) =>
+          isDateKey(key) &&
+          object(v) &&
+          text(v.planId) &&
+          (v.kind === "rest" || (v.kind === "workout" && text(v.workoutId))),
+      ))
   )
     return invalid();
   if (d.profile === null) {

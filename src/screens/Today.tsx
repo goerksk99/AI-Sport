@@ -2,6 +2,12 @@ import React from "react";
 import { View, Pressable, useWindowDimensions } from "react-native";
 import { router } from "expo-router";
 import { useStore } from "../storage/store";
+import {
+  calendarDay,
+  nextScheduledWorkout,
+  sessionDay,
+} from "../domain/calendar";
+import { dateKey, localDate } from "../domain/dates";
 import { record, startSession } from "../domain/training";
 import { demoCoach } from "../domain/coach";
 import { goals } from "../components/Onboarding";
@@ -13,11 +19,9 @@ export function Today() {
   const wide = useWindowDimensions().width > 1100;
   const p = data.profile!;
   const plan = data.plan!;
-  const next =
-    plan.workouts[
-      data.sessions.filter((x) => x.planId === plan.id).length %
-        plan.workouts.length
-    ];
+  const upcoming = nextScheduledWorkout(data);
+  const next = upcoming?.workout || plan.workouts[0];
+  const todayPlan = calendarDay(data, dateKey(new Date()));
   const total = data.sessions.reduce((n, x) => n + record(x).sets, 0);
   const rec = demoCoach.recommend(
     data.sessions.filter(
@@ -30,7 +34,7 @@ export function Today() {
   monday.setHours(0, 0, 0, 0);
   monday.setDate(now.getDate() - ((now.getDay() + 6) % 7));
   const thisWeek = data.sessions.filter(
-    (x) => Date.parse(x.completedAt!) >= monday.getTime(),
+    (x) => sessionDay(x) >= dateKey(monday) && sessionDay(x) <= dateKey(now),
   ).length;
   function start() {
     if (!data.draft)
@@ -110,6 +114,17 @@ export function Today() {
               </View>
               <Icon name="arrow-up-right" color={C.accent} />
             </View>
+            <T style={{ color: C.accent, fontSize: 12 }}>
+              {todayPlan.kind === "rest" ? "Heute ist Ruhetag. " : ""}
+              {upcoming
+                ? "Geplant: " +
+                  localDate(upcoming.date).toLocaleDateString("de-DE", {
+                    weekday: "long",
+                    day: "numeric",
+                    month: "short",
+                  })
+                : "Dein Training bleibt flexibel."}
+            </T>
             <View style={{ gap: 8, paddingVertical: 8 }}>
               <T
                 style={{
@@ -197,10 +212,9 @@ export function Today() {
                 const date = new Date(monday);
                 date.setDate(date.getDate() + i);
                 const done = data.sessions.some(
-                  (x) =>
-                    new Date(x.completedAt!).toDateString() ===
-                    date.toDateString(),
+                  (x) => sessionDay(x) === dateKey(date),
                 );
+                const schedule = calendarDay(data, dateKey(date));
                 const today = now.toDateString() === date.toDateString();
                 return (
                   <View key={i} style={{ alignItems: "center", gap: 9 }}>
@@ -236,6 +250,19 @@ export function Today() {
                         </T>
                       )}
                     </View>
+                    <View
+                      style={{
+                        width: 5,
+                        height: 5,
+                        borderRadius: 3,
+                        backgroundColor:
+                          schedule.kind === "workout"
+                            ? C.accent
+                            : schedule.kind === "rest"
+                              ? C.muted
+                              : "transparent",
+                      }}
+                    />
                   </View>
                 );
               })}
@@ -253,8 +280,15 @@ export function Today() {
               />
             </View>
             <T muted style={{ fontSize: 12 }}>
-              Dein Rhythmus zählt. Die Trainingstage bleiben flexibel.
+              Dein Rhythmus zählt. Grün: Training · Grau: Ruhetag.
             </T>
+            <Button
+              label="Kalender öffnen"
+              icon="calendar"
+              secondary
+              small
+              onPress={() => router.navigate("/calendar")}
+            />
           </Card>
         </View>
         <View style={{ flex: 1, gap: 22 }}>
