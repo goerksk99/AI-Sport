@@ -9,6 +9,7 @@ import {
   record,
   emptyData,
 } from "../src/domain/training";
+import { exerciseById } from "../src/data/exercises";
 import { demoCoach } from "../src/domain/coach";
 import { createRepository, STORAGE_KEY } from "../src/storage/repository";
 import { UserProfile, WorkoutSession } from "../src/domain/types";
@@ -72,7 +73,7 @@ test("Advanced four-day equipment-aware split and cardio", () => {
   assert.match(plan.workouts[1].name, /Unterkörper/);
   assert.ok(
     plan.workouts.every((w) =>
-      w.exercises.some((e) => e.exerciseId === "march"),
+      w.exercises.some((e) => exerciseById(e.exerciseId).movement === "cardio"),
     ),
   );
   assert.ok(

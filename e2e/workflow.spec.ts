@@ -625,3 +625,146 @@ test("Kalender: vergangenes Training am richtigen Tag eintragen und Leistungen e
   expect(d.sessions).toHaveLength(1);
   expect(d.sessions[0].trainingDate).toBe("2026-11-01");
 });
+
+test("Coach: wiederholte Fragen erzeugen nur eine aktualisierte Antwort", async ({
+  page,
+}) => {
+  await onboarding(page);
+  await page.getByRole("tab", { name: "Coach", exact: true }).click();
+  const button = page.getByRole("button", {
+    name: "Wie mache ich Fortschritte?",
+    exact: true,
+  });
+  await button.click();
+  await button.click();
+  await button.click();
+  await expect(page.getByTestId("coach-message")).toHaveCount(1);
+  await page
+    .getByRole("textbox", { name: "Deine Frage", exact: true })
+    .fill("  Wie mache ich Fortschritte?  ");
+  await page.getByRole("button", { name: "Senden", exact: true }).click();
+  await expect(page.getByTestId("coach-message")).toHaveCount(1);
+  await expect(
+    page.getByTestId("coach-message").getByText(/0 bestätigte/),
+  ).toBeVisible();
+  await page
+    .getByRole("button", { name: "Verlauf leeren", exact: true })
+    .click();
+  await expect(page.getByTestId("coach-message")).toHaveCount(0);
+});
+
+test("Coach: persönliche Planvorschau verändert erst nach Zustimmung den zukünftigen Plan", async ({
+  page,
+}) => {
+  const errors: string[] = [];
+  page.on("pageerror", (e) => errors.push(e.message));
+  await onboarding(page);
+  await page
+    .getByRole("button", { name: "Training starten", exact: true })
+    .click();
+  const before = await load(page);
+  await page.getByRole("tab", { name: "Coach", exact: true }).click();
+  await page
+    .getByRole("button", { name: "Plan gemeinsam anpassen", exact: true })
+    .click();
+  await page
+    .getByRole("button", { name: "Anpassung als Vorschau zeigen", exact: true })
+    .click();
+  await expect(
+    page.getByText(/Ein neuer Plan ist dafür nicht nötig/),
+  ).toBeVisible();
+  await page.getByRole("button", { name: "20 Min.", exact: true }).click();
+  await page.getByRole("button", { name: "Cardio", exact: true }).click();
+  await page
+    .getByRole("button", { name: "Anpassung als Vorschau zeigen", exact: true })
+    .click();
+  expect((await load(page)).plan.id).toBe(before.plan.id);
+  await page
+    .getByRole("button", { name: "Diese Planänderung übernehmen", exact: true })
+    .click();
+  const after = await load(page);
+  expect(after.profile.minutes).toBe(20);
+  expect(after.profile.trainingStyle).toBe("cardio");
+  expect(after.plan.workouts[0].name).toBe("Cardio A");
+  expect(after.draft).toEqual(before.draft);
+  expect(after.sessions).toEqual(before.sessions);
+  await expect(
+    page.getByRole("button", { name: "Planänderung übernommen", exact: true }),
+  ).toBeDisabled();
+  expect(errors).toEqual([]);
+});
+
+test("Bibliothek: Kettlebell filtern, Übung ergänzen und vorhandenen Entwurf erhalten", async ({
+  page,
+}) => {
+  await page.goto("/");
+  await page.getByRole("button", { name: "Weiter", exact: true }).click();
+  await page.getByRole("button", { name: "Kettlebell", exact: true }).click();
+  await page
+    .getByRole("button", { name: "Functional / CrossFit", exact: true })
+    .click();
+  await page.getByRole("button", { name: "Weiter", exact: true }).click();
+  await page
+    .getByRole("button", { name: "Meinen Plan erstellen", exact: true })
+    .click();
+  await page
+    .getByRole("button", { name: "Training starten", exact: true })
+    .click();
+  const before = await load(page);
+  await page.getByRole("tab", { name: "Training", exact: true }).click();
+  await page
+    .getByRole("button", { name: "Übungsbibliothek", exact: true })
+    .click();
+  await page.getByRole("button", { name: "Kettlebell", exact: true }).click();
+  await page
+    .getByRole("textbox", { name: "Übung suchen", exact: true })
+    .fill("Reverse");
+  await page
+    .getByRole("button", {
+      name: "Hinzufügen: Kettlebell Reverse Lunge",
+      exact: true,
+    })
+    .click();
+  await expect(
+    page.getByRole("button", { name: "Bereits im Training", exact: true }),
+  ).toBeDisabled();
+  const after = await load(page);
+  expect(after.plan.workouts[0].exercises).toHaveLength(
+    before.plan.workouts[0].exercises.length + 1,
+  );
+  expect(after.draft).toEqual(before.draft);
+  await page.reload();
+  await page
+    .getByRole("textbox", { name: "Übung suchen", exact: true })
+    .fill("Reverse");
+  await expect(
+    page.getByRole("button", { name: "Bereits im Training", exact: true }),
+  ).toBeDisabled();
+});
+
+test("Cardio ist eigenständige Trainingsart mit zeitbasierten Übungen", async ({
+  page,
+}) => {
+  await onboarding(page, "Cardio");
+  const d = await load(page);
+  expect(d.profile.trainingStyle).toBe("cardio");
+  expect(d.plan.workouts[0].name).toBe("Cardio A");
+  expect(d.plan.workouts[0].exercises).toHaveLength(2);
+  expect(
+    d.plan.workouts[0].exercises.reduce(
+      (n: number, e: any) =>
+        n + e.sets.reduce((a: number, s: any) => a + s.reps, 0),
+      0,
+    ),
+  ).toBe(45 * 60);
+  await page
+    .getByRole("button", { name: "Training starten", exact: true })
+    .click();
+  await page
+    .getByRole("button", {
+      name: "Alles wie vorgeschlagen geschafft",
+      exact: true,
+    })
+    .click();
+  await history(page);
+});

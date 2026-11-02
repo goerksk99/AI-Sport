@@ -9,6 +9,7 @@ import {
   targetRange,
   exerciseSummary,
 } from "../domain/training";
+import { equipmentLabels } from "../domain/catalog";
 import { effortHint } from "../domain/preferences";
 import { exerciseById } from "../data/exercises";
 import { goals } from "../components/Onboarding";
@@ -47,6 +48,12 @@ export function Training() {
         eyebrow="DEIN PLAN"
         title="Ein klarer Plan. Dein Spielraum."
         description={`${p.days} Einheiten pro Woche · ${goals[p.goal]}`}
+      />
+      <Button
+        label="Übungsbibliothek"
+        icon="search"
+        secondary
+        onPress={() => router.navigate("/exercises")}
       />
       <Button
         label="Kalender & Ruhetage"
@@ -131,16 +138,7 @@ export function Training() {
               <View style={{ flex: 1 }}>
                 <T style={{ fontSize: 18, fontWeight: "700" }}>{e.name}</T>
                 <T muted style={{ fontSize: 12 }}>
-                  {e.muscles.join(" · ")} ·{" "}
-                  {e.equipment === "body"
-                    ? "Körpergewicht"
-                    : e.equipment === "gym"
-                      ? "Studiogerät"
-                      : e.equipment === "barbell"
-                        ? "Langhantel & Hantelbank"
-                        : e.equipment === "pullup"
-                          ? "Klimmzugstange"
-                          : "Kurzhantel"}
+                  {e.muscles.join(" · ")} · {equipmentLabels[e.equipment]}
                 </T>
               </View>
               <Button

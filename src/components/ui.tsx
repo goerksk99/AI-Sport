@@ -157,6 +157,7 @@ export function Field({
   placeholder,
   numeric = false,
   multiline = false,
+  onSubmit,
 }: {
   label: string;
   value: string;
@@ -164,6 +165,7 @@ export function Field({
   placeholder?: string;
   numeric?: boolean;
   multiline?: boolean;
+  onSubmit?: () => void;
 }) {
   return (
     <View style={{ gap: 7, flex: 1 }}>
@@ -172,6 +174,8 @@ export function Field({
         accessibilityLabel={label}
         value={value}
         onChangeText={onChange}
+        onSubmitEditing={onSubmit}
+        returnKeyType={onSubmit ? "send" : "done"}
         placeholder={placeholder}
         placeholderTextColor="#758578"
         keyboardType={numeric ? "decimal-pad" : "default"}

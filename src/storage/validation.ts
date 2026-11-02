@@ -61,9 +61,14 @@ function session(v: unknown, status: "draft" | "completed"): boolean {
     (v.performanceUpdatedAt === undefined || time(v.performanceUpdatedAt)) &&
     v.status === status &&
     (v.trainingStyle === undefined ||
-      ["strength", "endurance", "calisthenics", "mixed"].includes(
-        v.trainingStyle as string,
-      )) &&
+      [
+        "strength",
+        "endurance",
+        "calisthenics",
+        "mixed",
+        "functional",
+        "cardio",
+      ].includes(v.trainingStyle as string)) &&
     (v.documentationMode === undefined ||
       ["simple", "quick", "detailed"].includes(
         v.documentationMode as string,
@@ -144,20 +149,38 @@ export function parseData(raw: string): AppData {
     !["fit", "muscle", "lose", "performance"].includes(p.goal as string) ||
     !["beginner", "advanced"].includes(p.level as string) ||
     ![2, 3, 4, 5].includes(p.days as number) ||
-    ![25, 45, 60].includes(p.minutes as number) ||
+    ![15, 20, 25, 30, 45, 60].includes(p.minutes as number) ||
     !["home", "gym"].includes(p.location as string) ||
     !Array.isArray(p.equipment) ||
     !p.equipment.includes("body") ||
     !p.equipment.every((x) =>
-      ["body", "dumbbell", "gym", "barbell", "pullup"].includes(x),
+      [
+        "body",
+        "dumbbell",
+        "gym",
+        "barbell",
+        "pullup",
+        "kettlebell",
+        "bands",
+        "rings",
+        "rope",
+        "box",
+        "rower",
+        "treadmill",
+      ].includes(x),
     ) ||
     !Array.isArray(p.preferences) ||
     !p.preferences.includes("strength") ||
     !p.preferences.every((x) => ["strength", "cardio"].includes(x)) ||
     (p.trainingStyle !== undefined &&
-      !["strength", "endurance", "calisthenics", "mixed"].includes(
-        p.trainingStyle as string,
-      )) ||
+      ![
+        "strength",
+        "endurance",
+        "calisthenics",
+        "mixed",
+        "functional",
+        "cardio",
+      ].includes(p.trainingStyle as string)) ||
     (p.assessments !== undefined &&
       (!Array.isArray(p.assessments) ||
         new Set(p.assessments.map((a) => (object(a) ? a.exerciseId : null)))
@@ -166,6 +189,15 @@ export function parseData(raw: string): AppData {
           (a) =>
             object(a) &&
             exerciseId(a.exerciseId) &&
+            (a.trainingStyle === undefined ||
+              [
+                "strength",
+                "endurance",
+                "calisthenics",
+                "mixed",
+                "functional",
+                "cardio",
+              ].includes(a.trainingStyle as string)) &&
             weight(a.weight) &&
             positive(a.setsMin) &&
             positive(a.setsMax) &&
@@ -185,9 +217,14 @@ export function parseData(raw: string): AppData {
     !text(plan.id) ||
     plan.profileId !== p.id ||
     (plan.trainingStyle !== undefined &&
-      !["strength", "endurance", "calisthenics", "mixed"].includes(
-        plan.trainingStyle as string,
-      )) ||
+      ![
+        "strength",
+        "endurance",
+        "calisthenics",
+        "mixed",
+        "functional",
+        "cardio",
+      ].includes(plan.trainingStyle as string)) ||
     !time(plan.createdAt) ||
     typeof plan.rationale !== "string" ||
     !Array.isArray(plan.workouts) ||

@@ -72,7 +72,9 @@ export function Shell({ children }: { children: React.ReactNode }) {
     >
       {tabs.map((t) => {
         const active =
-          path === t.path || (path === "/calendar" && t.path === "/training");
+          path === t.path ||
+          (["/calendar", "/exercises"].includes(path) &&
+            t.path === "/training");
         return (
           <Pressable
             key={t.path}

@@ -4,6 +4,7 @@ import { View } from "react-native";
 import { useStore } from "../storage/store";
 import { Onboarding, goals } from "../components/Onboarding";
 import { Button, Card, Label, T, C, styles as s } from "../components/ui";
+import { equipmentLabels } from "../domain/catalog";
 import { trainingStyles } from "../domain/preferences";
 import { Assessments } from "../components/Assessments";
 import { generatePlan } from "../domain/training";
@@ -50,27 +51,14 @@ export function Profile() {
           ],
           ["Dein Rhythmus", `${p.days} Tage · ${p.minutes} Minuten`],
           ["Trainingsort", p.location === "gym" ? "Fitnessstudio" : "Zu Hause"],
-          [
-            "Equipment",
-            p.equipment
-              .map((e) =>
-                e === "gym"
-                  ? "Studiogeräte"
-                  : e === "body"
-                    ? "Körpergewicht"
-                    : e === "barbell"
-                      ? "Langhantel & Hantelbank"
-                      : e === "pullup"
-                        ? "Klimmzugstange"
-                        : "Kurzhanteln",
-              )
-              .join(", "),
-          ],
+          ["Equipment", p.equipment.map((e) => equipmentLabels[e]).join(", ")],
           [
             "Vorlieben",
-            p.preferences.includes("cardio")
-              ? "Kraft & Ausdauer"
-              : "Kraft & Stabilität",
+            p.trainingStyle === "cardio"
+              ? "Ausdauer"
+              : p.preferences.includes("cardio")
+                ? "Kraft & Ausdauer"
+                : "Kraft & Stabilität",
           ],
           ["Körpergewicht", p.weight ? `${p.weight} kg` : "Nicht angegeben"],
           ["Einschränkungen", p.limitations || "Nicht angegeben"],
@@ -125,7 +113,7 @@ export function Profile() {
         </T>
       </Card>
       <T muted style={{ fontSize: 12 }}>
-        PULS · Prototyp 1.2. Daten sind lokal und nicht verschlüsselt. Das
+        PULS · Prototyp 1.3. Daten sind lokal und nicht verschlüsselt. Das
         Löschen von App- oder Browserdaten entfernt auch deine Trainings. Keine
         Cloud-Synchronisierung.
       </T>

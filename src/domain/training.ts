@@ -8,6 +8,7 @@ import {
   ExercisePerformance,
   DocumentationMode,
 } from "./types";
+import { categoryOf } from "./catalog";
 import { dateKey, isDateKey } from "./dates";
 import { exercises, exerciseById } from "../data/exercises";
 export const uid = () =>
@@ -30,7 +31,11 @@ export function plannedExercise(
   p: UserProfile,
 ): PlannedExercise {
   const e = exerciseById(exerciseId);
-  const assessment = p.assessments?.find((a) => a.exerciseId === exerciseId);
+  const assessment = p.assessments?.find(
+    (a) =>
+      a.exerciseId === exerciseId &&
+      (a.trainingStyle || "strength") === (p.trainingStyle || "strength"),
+  );
   const style = p.trainingStyle || "strength";
   const count =
     assessment?.setsMin ??
@@ -45,7 +50,7 @@ export function plannedExercise(
     id: uid(),
     exerciseId,
     source: assessment ? "assessment" : "plan",
-    editedAt: assessment?.updatedAt,
+    editedAt: assessment?.updatedAt || new Date().toISOString(),
     restSeconds: style === "endurance" ? 40 : e.movement === "core" ? 45 : 90,
     sets: Array.from({ length: count }, () => ({
       id: uid(),
@@ -58,11 +63,13 @@ export function plannedExercise(
             : 30
           : style === "endurance"
             ? 18
-            : style === "calisthenics"
-              ? 8
-              : p.goal === "muscle"
-                ? 10
-                : 12,
+            : style === "functional"
+              ? 10
+              : style === "calisthenics"
+                ? 8
+                : p.goal === "muscle"
+                  ? 10
+                  : 12,
     })),
   };
 }
@@ -76,17 +83,23 @@ export function generatePlan(p: UserProfile): WorkoutPlan {
         (p.level === "advanced" || e.difficulty === "beginner"),
     );
     const assessed = options.find((e) =>
-      p.assessments?.some((a) => a.exerciseId === e.id),
+      p.assessments?.some(
+        (a) =>
+          a.exerciseId === e.id &&
+          (a.trainingStyle || "strength") === (p.trainingStyle || "strength"),
+      ),
     );
     if (assessed) return assessed;
     const preferred = options.filter((e) =>
-      p.trainingStyle === "mixed"
-        ? index % 2 === 0
-          ? e.weighted
-          : !e.weighted
-        : p.trainingStyle === "calisthenics"
-          ? !e.weighted
-          : e.weighted,
+      p.trainingStyle === "functional"
+        ? ["functional", "kettlebell"].includes(categoryOf(e))
+        : p.trainingStyle === "mixed"
+          ? index % 2 === 0
+            ? e.weighted
+            : !e.weighted
+          : p.trainingStyle === "calisthenics"
+            ? !e.weighted
+            : e.weighted,
     );
     const choices = [...(preferred.length ? preferred : options)].sort(
       (a, b) =>
@@ -102,14 +115,17 @@ export function generatePlan(p: UserProfile): WorkoutPlan {
       ? i % 2 === 0
         ? ["push", "pull", "core"]
         : ["squat", "hinge", "core"]
-      : [
-          "squat",
-          "push",
-          "pull",
-          ...(p.minutes >= 45 ? ["hinge"] : []),
-          "core",
-        ];
-    if (p.preferences.includes("cardio")) movements.push("cardio");
+      : p.minutes <= 20
+        ? ["squat", "push", "pull"]
+        : [
+            "squat",
+            "push",
+            "pull",
+            ...(p.minutes >= 45 ? ["hinge"] : []),
+            "core",
+          ];
+    if (p.preferences.includes("cardio") || p.trainingStyle === "functional")
+      movements.push("cardio");
     return {
       id: uid(),
       name: split
@@ -124,12 +140,44 @@ export function generatePlan(p: UserProfile): WorkoutPlan {
       exercises: movements.map((m) => plannedExercise(choose(m, i).id, p)),
     };
   });
+  if (p.trainingStyle === "cardio") {
+    const cardio = pool.filter(
+      (e) =>
+        e.movement === "cardio" &&
+        e.id !== "march" &&
+        (p.level === "advanced" || e.difficulty === "beginner"),
+    );
+    const preferred = cardio.filter((e) => e.equipment !== "body");
+    const choices = preferred.length ? preferred : cardio;
+    workouts.splice(
+      0,
+      workouts.length,
+      ...Array.from({ length: p.days }, (_, i) => {
+        const warmup = plannedExercise("march", p);
+        warmup.sets[0].reps = 300;
+        const main = plannedExercise(choices[i % choices.length].id, p);
+        main.sets = main.sets.slice(0, 1);
+        main.sets[0].reps = Math.max(5, p.minutes - 5) * 60;
+        return {
+          id: uid(),
+          name: `Cardio ${String.fromCharCode(65 + i)}`,
+          focus: "Ausdauer im kontrollierten Sprechtempo",
+          exercises: [warmup, main],
+        };
+      }),
+    );
+  }
+  if (p.trainingStyle === "functional")
+    workouts.forEach((w, i) => {
+      w.name = `Functional ${String.fromCharCode(65 + i)}`;
+      w.focus = "Kraft, Stabilität und kontrollierte Ausdauer";
+    });
   return {
     id: uid(),
     profileId: p.id,
     trainingStyle: p.trainingStyle || "strength",
     createdAt: new Date().toISOString(),
-    rationale: `${p.trainingStyle === "endurance" ? "Kraftausdauer: höhere Wiederholungen, moderate Belastung und kürzere Pausen." : p.trainingStyle === "calisthenics" ? "Calisthenics: kontrollierte Körpergewichtsübungen und passende Varianten." : p.trainingStyle === "mixed" ? "Gemischt: externe Lasten und Körpergewichtsübungen im Wechsel." : "Krafttraining: kontrollierte Grundbewegungen."} ${p.days} Einheiten à ca. ${p.minutes} Minuten. ${split ? "Ober-/Unterkörper-Split für dein fortgeschrittenes Niveau." : "Ganzkörpertraining mit wiederkehrenden Grundbewegungen."} ${p.trainingStyle === "endurance" ? "Zielbereich: 16–20 Wiederholungen." : p.trainingStyle === "calisthenics" ? "Zielbereich: 6–10 Wiederholungen." : p.goal === "muscle" ? "Zielbereich: 8–12 Wiederholungen." : "Zielbereich: 10–14 Wiederholungen."} ${p.limitations ? "Angegebene Einschränkungen werden nicht medizinisch ausgewertet. Prüfe die Übungsauswahl fachlich, bevor du beginnst." : ""} Gewichte sind bewusst offen: Beginne leicht und wähle eine kontrolliert ausführbare Last.`,
+    rationale: `${p.trainingStyle === "cardio" ? "Cardio: fünf Minuten lockerer Einstieg und anschließende Ausdauer bei kontrolliertem Sprechtempo." : p.trainingStyle === "functional" ? "Funktionelles Training: Grundbewegungen plus Ausdauer, ohne maximalen Zeitdruck oder Wettkampf-WOD." : p.trainingStyle === "endurance" ? "Kraftausdauer: höhere Wiederholungen, moderate Belastung und kürzere Pausen." : p.trainingStyle === "calisthenics" ? "Calisthenics: kontrollierte Körpergewichtsübungen und passende Varianten." : p.trainingStyle === "mixed" ? "Gemischt: externe Lasten und Körpergewichtsübungen im Wechsel." : "Krafttraining: kontrollierte Grundbewegungen."} ${p.days} Einheiten à ca. ${p.minutes} Minuten. ${split ? "Ober-/Unterkörper-Split für dein fortgeschrittenes Niveau." : "Ganzkörpertraining mit wiederkehrenden Grundbewegungen."} ${p.trainingStyle === "cardio" ? "Die Belastung wird über Dauer und Sprechtempo gesteuert." : p.trainingStyle === "functional" ? "Zielbereich für Kraftübungen: 8–12 kontrollierte Wiederholungen." : p.trainingStyle === "endurance" ? "Zielbereich: 16–20 Wiederholungen." : p.trainingStyle === "calisthenics" ? "Zielbereich: 6–10 Wiederholungen." : p.goal === "muscle" ? "Zielbereich: 8–12 Wiederholungen." : "Zielbereich: 10–14 Wiederholungen."} ${p.limitations ? "Angegebene Einschränkungen werden nicht medizinisch ausgewertet. Prüfe die Übungsauswahl fachlich, bevor du beginnst." : ""} Gewichte sind bewusst offen: Beginne leicht und wähle eine kontrolliert ausführbare Last.`,
     workouts,
   };
 }
@@ -190,7 +238,7 @@ export function startSession(
       const useHistory =
         !!previous &&
         (!e.editedAt ||
-          e.editedAt <
+          e.editedAt <=
             (previousSession!.performanceUpdatedAt ||
               previousSession!.updatedAt));
       const completeHistory =
@@ -229,7 +277,12 @@ export function record(s: WorkoutSession): ProgressRecord {
   const confirmed = s.exercises.flatMap((e) =>
     e.sets
       .filter((x) => x.status === "confirmed")
-      .map((x) => ({ ...x, weighted: exerciseById(e.exerciseId).weighted })),
+      .map((x) => ({
+        ...x,
+        weighted:
+          exerciseById(e.exerciseId).weighted &&
+          exerciseById(e.exerciseId).unit === "reps",
+      })),
   );
   return {
     sessionId: s.id,

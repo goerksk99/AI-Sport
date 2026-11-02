@@ -2,6 +2,32 @@
 
 React Native, Expo SDK 55, Expo Router und TypeScript. Deutsch, Dark Mode, lokale Speicherung. Kein Konto, kein Server und keine kostenpflichtige API. Der Coach verwendet transparente Regeln, keine echte KI.
 
+## Neu in 1.3.0: persönlicher lokaler Coach und Übungsbibliothek
+
+Wiederholte Coach-Fragen erzeugen keine mehrfachen Antwortblöcke mehr. Dieselbe Frage aktualisiert ihre vorhandene Antwort; Unterschiede in Großschreibung, Leerzeichen und abschließender Interpunktion werden berücksichtigt. Der lokale Verlauf ist auf 30 unterschiedliche Fragen begrenzt und kann geleert werden. Er wird nicht dauerhaft als Chat gespeichert.
+
+Der Coach nutzt Ziel, Erfahrung, Equipment, Zeitbudget, Kalender und bestätigte Leistungen. Er nennt die Grundlage seiner Antworten und unterscheidet angenommene von bestätigten Sätzen. Unterstützte Themen sind Fortschritt, Belastung, Pausen, Aufwärmen, Technik bekannter Übungen, Motivation, verpasste Einheiten, Kalender, allgemeine Ernährung sowie konkrete Planänderungen. Beschwerden werden nicht diagnostiziert und erzeugen keine medizinisch begründeten Plananpassungen.
+
+**Plan gemeinsam anpassen** bietet eine strukturierte Vorschau für Trainingstage, Dauer, Schwerpunkt und Ziel. Auch unterstützte kurze Anfragen erzeugen Vorschläge, beispielsweise:
+
+- „Ich habe nur 20 Minuten“
+- „Plane 3 Tage pro Woche“
+- „Ich möchte Cardio trainieren“
+- „Ich möchte mit Kettlebell trainieren“
+- „Ich möchte ohne Geräte trainieren“
+- „Ich möchte leichter trainieren“
+- „Ersetze Liegestütze“
+
+Erst **Diese Planänderung übernehmen** schreibt eine Änderung. Die Vorschau erklärt, ob der zukünftige Plan neu erstellt wird oder nur Satzumfang beziehungsweise Übungen geändert werden. Eigene Übungsänderungen können bei einer vollständigen Neuplanung ersetzt werden. Laufende Einheit und Historie bleiben unverändert. Überholte Vorschläge werden nach einer Profil-/Planänderung abgelehnt. Unveränderte Angaben erzeugen keinen unnötigen neuen Plan. Bei unveränderter Wochenhäufigkeit bleibt der ausgewählte Wochentagsrhythmus erhalten.
+
+Neue Zeit-/Zielvorgaben werden nicht durch einen älteren, längeren Trainingsumfang überschrieben. Bekannte Lasten können für dieselbe Übung und Trainingsart übernommen werden. Selbsteinschätzungen werden mit der Trainingsart gespeichert; alte Angaben ohne diese Kennzeichnung gelten als Krafttraining und werden nicht automatisch auf Kraftausdauer übertragen.
+
+Der Katalog enthält jetzt **54 Übungen**, darunter acht Kettlebell-Übungen, weitere Calisthenics-Varianten, funktionelle Übungen und Cardio. Die Bibliothek ist über **Training → Übungsbibliothek** oder den Coach erreichbar. Suche und Filter berücksichtigen Kategorien, Muskelgruppen und Equipment. Eine Übung kann dem gewählten zukünftigen Training hinzugefügt werden; doppelte Einträge derselben Übung werden verhindert. Fortgeschrittene Varianten sind gekennzeichnet und werden Anfängern nicht automatisch eingeplant.
+
+Neue Equipment-Optionen sind Kettlebell, Widerstandsbänder, Ringe, Springseil, Trainingsbox, Ruderergometer und Laufband. **Functional / CrossFit** ergänzt kontrollierte funktionelle Bewegungen und Ausdauer, kein maximales Wettkampfprogramm. **Cardio** ist eine eigene Trainingsart mit fünf Minuten lockerem Einstieg und einem zeitgesteuerten Hauptteil im Sprechtempo. Unterstützte Zeitfenster sind 15, 20, 25, 30, 45 und 60 Minuten. Für geladene Halte-/Trageübungen wird nicht fälschlich Gewicht × Sekunden als Wiederholungsvolumen gezählt.
+
+**Grenze:** Das ist weiterhin ein lokaler Regelcoach mit unterstützten Formulierungen, kein frei verstehendes Sprachmodell. Unbekannte Fragen werden ausdrücklich als nicht zugeordnet benannt. Es gibt keine KI-API, keine serverseitigen Schlüssel und keine Übertragung persönlicher Daten an einen KI-Anbieter. Echte freie KI-Unterhaltung und medizinische Beratung sind nicht implementiert.
+
 ## Neu in 1.2.0: Kalender
 
 Über **Heute → Kalender öffnen**, **Training → Kalender & Ruhetage** oder **Profil → Trainingstage planen** erreichst du die Monatsansicht. Grün markiert geplante Trainings, Grau Ruhetage; ein Häkchen zeigt tatsächlich gespeicherte Einheiten. Die Wochenübersicht auf Heute verwendet dieselbe Planung.
@@ -31,7 +57,7 @@ Eine Sammelaktion erhält bereits bestätigte, geänderte und ausgelassene Sätz
 
 ## Auf dem Handy aktualisieren
 
-Android-Paket: `com.aisport.puls` · Version **1.2.0** · **versionCode 3** · Android ab 7.0 (API 24) · ARM64 und ARMv7.
+Android-Paket: `com.aisport.puls` · Version **1.3.0** · **versionCode 4** · Android ab 7.0 (API 24) · ARM64 und ARMv7.
 
 Die neue Test-APK direkt über die bestehende App installieren. **Nicht vorher deinstallieren oder App-Daten löschen**, sonst gehen lokale Trainings verloren. Paketname und Entwicklungsschlüssel werden beibehalten; die Zertifikate der alten APK und des Builds werden beim Bereitstellen verglichen. Es handelt sich um eine private Testversion, nicht um einen Store-Release. Ein erfolgreicher Build und eine geprüfte Signatur ersetzen keinen echten Gerätetest.
 
@@ -63,7 +89,7 @@ Das Onboarding fragt Ziel, Niveau, Rhythmus, Zeit und verfügbares Equipment ab.
 - **Calisthenics:** Körpergewichtsübungen, typischerweise 6–10 Wiederholungen; anspruchsvollere Varianten nur für entsprechende Erfahrung. Klimmzüge setzen eine sicher montierte, vorhandene Stange voraus.
 - **Gemischt:** Tage mit externer Last und Tage mit Körpergewichtsübungen. Equipment begrenzt die Auswahl immer.
 
-Anfänger erhalten einen Ganzkörperplan, Fortgeschrittene ab vier Tagen einen Ober-/Unterkörper-Split. Halteübungen werden in Sekunden, optionale Ausdauer separat geplant. Zeitangaben im Plan sind Richtwerte. Die lokale Datenbank enthält 21 Übungen mit Anleitung und Metadaten; sie ersetzt keine fachliche Beurteilung körperlicher Einschränkungen.
+Anfänger erhalten einen Ganzkörperplan, Fortgeschrittene ab vier Tagen einen Ober-/Unterkörper-Split. Halteübungen werden in Sekunden, optionale Ausdauer separat geplant. Zeitangaben im Plan sind Richtwerte. Die lokale Datenbank enthält 54 Übungen mit Anleitung und Metadaten; sie ersetzt keine fachliche Beurteilung körperlicher Einschränkungen.
 
 Für konkrete Übungen können freiwillig übliche Bereiche hinterlegt werden, beispielsweise Langhantel-Bankdrücken: **100 kg, 3–4 Sätze, 6–10 Wiederholungen**. Gespeichert werden die ursprünglichen Bereiche und der Zeitpunkt als Selbsteinschätzung. Der konkrete Vorschlag verwendet die untere Satzanzahl und die Mitte des Wiederholungsbereichs, hier 3 × 8 mit 100 kg. Solche Werte sind weder absolvierte Trainings noch ein Maximalkrafttest. Sie werden nicht auf andere Übungen oder Geräte umgerechnet.
 

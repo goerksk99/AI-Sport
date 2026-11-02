@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import { View } from "react-native";
 import { SelfAssessment, UserProfile } from "../domain/types";
+import { trainingStyles } from "../domain/preferences";
 import { availableExercises } from "../domain/training";
 import { exerciseById } from "../data/exercises";
 import { Button, Card, Chip, Field, Label, T, C, styles as s } from "./ui";
@@ -58,6 +59,7 @@ export function Assessments({
       ...value.filter((a) => a.exerciseId !== selected),
       {
         exerciseId: selected,
+        trainingStyle: profile.trainingStyle || "strength",
         weight: ex.weighted ? w : undefined,
         setsMin: smin,
         setsMax: smax,

@@ -21,6 +21,7 @@ import {
   styles as s,
 } from "./ui";
 import { Assessments } from "./Assessments";
+import { equipmentLabels } from "../domain/catalog";
 import { trainingStyles } from "../domain/preferences";
 export const goals: Record<FitnessGoal, string> = {
   fit: "Fitter im Alltag",
@@ -191,7 +192,7 @@ export function Onboarding({
           </View>
           <Label>ZEIT PRO EINHEIT</Label>
           <View style={s.wrap}>
-            {[25, 45, 60].map((v) => (
+            {[15, 20, 25, 30, 45, 60].map((v) => (
               <Chip
                 key={v}
                 label={`${v} Min.`}
@@ -258,34 +259,50 @@ export function Onboarding({
               />
             ))}
           </View>
+          <Label>WEITERES EQUIPMENT (OPTIONAL)</Label>
           <View style={s.wrap}>
             {(
               [
-                { v: "barbell", l: "Langhantel & Hantelbank" },
-                { v: "pullup", l: "Klimmzugstange" },
-              ] as const
-            ).map((x) => (
-              <Chip
-                key={x.v}
-                label={x.l}
-                selected={equipment.includes(x.v)}
-                onPress={() =>
-                  setEquipment((a) =>
-                    a.includes(x.v) ? a.filter((e) => e !== x.v) : [...a, x.v],
-                  )
-                }
-              />
-            ))}
+                "barbell",
+                "pullup",
+                "kettlebell",
+                "bands",
+                "rings",
+                "rope",
+                "box",
+                "rower",
+                "treadmill",
+              ] as Equipment[]
+            )
+              .map((v) => ({ v, l: equipmentLabels[v] }))
+              .map((x) => (
+                <Chip
+                  key={x.v}
+                  label={x.l}
+                  selected={equipment.includes(x.v)}
+                  onPress={() =>
+                    setEquipment((a) =>
+                      a.includes(x.v)
+                        ? a.filter((e) => e !== x.v)
+                        : [...a, x.v],
+                    )
+                  }
+                />
+              ))}
           </View>
-          <Label>OPTIONAL ERGÄNZEN</Label>
-          <View style={s.wrap}>
-            <T muted>Zusätzliche lockere Ausdauer</T>
-            <Chip
-              label="+ Ausdauer einplanen"
-              selected={cardio}
-              onPress={() => setCardio(!cardio)}
-            />
-          </View>
+          {trainingStyle !== "cardio" && (
+            <>
+              <Label>OPTIONAL ERGÄNZEN</Label>
+              <View style={s.wrap}>
+                <T muted>Zusätzliche lockere Ausdauer</T>
+                <Chip
+                  label="+ Ausdauer einplanen"
+                  selected={cardio}
+                  onPress={() => setCardio(!cardio)}
+                />
+              </View>
+            </>
+          )}
         </>
       )}
       {step === 2 && (
@@ -298,9 +315,11 @@ export function Onboarding({
               {location === "gym" ? "Studio" : "Zu Hause"}
             </T>
             <T muted>
-              {level === "advanced" && days >= 4
-                ? "Ober-/Unterkörper-Split"
-                : "Ganzkörper mit Grundbewegungen"}{" "}
+              {trainingStyle === "cardio"
+                ? "Ausdauereinheiten"
+                : level === "advanced" && days >= 4
+                  ? "Ober-/Unterkörper-Split"
+                  : "Ganzkörper mit Grundbewegungen"}{" "}
               · {trainingStyles[trainingStyle]}
               {cardio ? " + Ausdauer" : ""}
             </T>

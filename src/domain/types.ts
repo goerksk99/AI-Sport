@@ -1,8 +1,22 @@
 export type FitnessGoal = "fit" | "muscle" | "lose" | "performance";
-export type Equipment = "body" | "dumbbell" | "gym" | "barbell" | "pullup";
-export type TrainingStyle = "strength" | "endurance" | "calisthenics" | "mixed";
+export type Equipment =
+  | "body"
+  | "dumbbell"
+  | "gym"
+  | "barbell"
+  | "pullup"
+  | "kettlebell"
+  | "bands"
+  | "rings"
+  | "rope"
+  | "box"
+  | "rower"
+  | "treadmill";
+export type TrainingStyle =
+  "strength" | "endurance" | "calisthenics" | "mixed" | "functional" | "cardio";
 export type DocumentationMode = "simple" | "quick" | "detailed";
 export type SelfAssessment = {
+  trainingStyle?: TrainingStyle;
   exerciseId: string;
   weight?: number;
   setsMin: number;
@@ -27,7 +41,10 @@ export type UserProfile = {
   trainingStyle?: TrainingStyle;
   assessments?: SelfAssessment[];
 };
+export type ExerciseCategory =
+  "strength" | "calisthenics" | "kettlebell" | "functional" | "cardio";
 export type Exercise = {
+  category?: ExerciseCategory;
   id: string;
   name: string;
   muscles: string[];
