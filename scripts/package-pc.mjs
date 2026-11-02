@@ -14,8 +14,12 @@ await mkdir(output, { recursive: true });
 await cp(path.join(root, "dist"), path.join(output, "app"), {
   recursive: true,
 });
-for (const name of ["server.mjs", "START-PULS.cmd"])
+for (const name of ["server.mjs"])
   await cp(path.join(root, "scripts/pc", name), path.join(output, name));
+const launcher = (
+  await readFile(path.join(root, "scripts/pc/START-PULS.cmd"), "utf8")
+).replace(/\r?\n/g, "\r\n");
+await writeFile(path.join(output, "START-PULS.cmd"), launcher);
 const instructions = (
   await readFile(path.join(root, "scripts/pc/START-HIER.txt"), "utf8")
 ).replaceAll("{{VERSION}}", version);
