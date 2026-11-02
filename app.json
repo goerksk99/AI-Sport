@@ -6,9 +6,25 @@
     "version": "1.0.0",
     "orientation": "portrait",
     "userInterfaceStyle": "dark",
-    "web": { "bundler": "metro", "output": "single", "name": "PULS" },
-    "plugins": ["expo-router"],
-    "ios": { "supportsTablet": true },
-    "android": { "package": "com.aisport.puls" }
+    "web": {
+      "bundler": "metro",
+      "output": "single",
+      "name": "PULS"
+    },
+    "plugins": [
+      "expo-router"
+    ],
+    "ios": {
+      "supportsTablet": true
+    },
+    "android": {
+      "package": "com.aisport.puls",
+      "allowBackup": false,
+      "blockedPermissions": [
+        "android.permission.READ_EXTERNAL_STORAGE",
+        "android.permission.WRITE_EXTERNAL_STORAGE",
+        "android.permission.SYSTEM_ALERT_WINDOW"
+      ]
+    }
   }
 }

@@ -90,7 +90,7 @@ Auf dem Handy die APK herunterladen, öffnen und der verwendeten Download-/Datei
 
 ### APK erneut bauen
 
-Voraussetzungen: Node.js, ein vollständiges JDK 17 oder 21 und ein Android SDK (Platform 36, Build Tools 36.0.0, NDK 27.1.12297006 und CMake 3.22.1). `JAVA_HOME` und `ANDROID_HOME` passend setzen. Das Android-SDK kann über Android Studio eingerichtet werden. Auf Windows das Bash-Skript mit WSL oder Git Bash ausführen.
+Voraussetzungen: Node.js, ein vollständiges JDK 17 (vom React-Native-Gradle-Plugin benötigt) und ein Android SDK (Platform 36, Build Tools 36.0.0, NDK 27.1.12297006 und CMake 3.22.1). `JAVA_HOME` und `ANDROID_HOME` passend setzen. Das Android-SDK kann über Android Studio eingerichtet werden. Auf Windows das Bash-Skript mit WSL oder Git Bash ausführen.
 
 ```sh
 npm ci
