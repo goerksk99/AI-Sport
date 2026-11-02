@@ -476,3 +476,40 @@ test("Coach-Vorschlag ändert erst nach Übernahme den zukünftigen Plan", async
   expect(after.sessions).toEqual(before.sessions);
   expect(after.plan).not.toEqual(before.plan);
 });
+
+test("Darstellungen vereinfachen die Oberfläche und behalten dieselben Leistungsdaten", async ({
+  page,
+}) => {
+  await onboarding(page);
+  await page
+    .getByRole("button", { name: "Training starten", exact: true })
+    .click();
+  await page
+    .getByRole("button", { name: "Nur Abweichungen", exact: true })
+    .click();
+  await expect(
+    page.getByRole("button", { name: "Beinpresse: geschafft", exact: true }),
+  ).toBeVisible();
+  await page
+    .getByRole("button", { name: "Beinpresse: geschafft", exact: true })
+    .click();
+  const before = (await load(page)).draft.exercises;
+  await page.getByRole("button", { name: "Detailliert", exact: true }).click();
+  await expect(
+    page
+      .getByRole("textbox", { name: "Wiederholungen Satz 1", exact: true })
+      .first(),
+  ).toBeVisible();
+  await page
+    .getByRole("button", { name: "Übersicht anzeigen", exact: true })
+    .click();
+  await expect(page.getByRole("textbox")).toHaveCount(0);
+  expect((await load(page)).draft.exercises).toEqual(before);
+  await page
+    .getByRole("button", { name: "Nur Abweichungen", exact: true })
+    .click();
+  await expect(
+    page.getByRole("button", { name: "Beinpresse: geschafft", exact: true }),
+  ).toBeVisible();
+  expect((await load(page)).draft.exercises).toEqual(before);
+});

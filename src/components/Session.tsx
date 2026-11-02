@@ -92,7 +92,7 @@ export function Session() {
   }
   const chooseMode = (mode: DocumentationMode) => {
     mutate((s) => ({ ...s, documentationMode: mode }));
-    if (mode === "detailed") setChanges(true);
+    setChanges(mode !== "simple");
   };
   return (
     <>
@@ -138,14 +138,17 @@ export function Session() {
           <Button
             label="Alles wie vorgeschlagen geschafft"
             icon="check-circle"
-            disabled={invalid || pending === 0}
+            disabled={invalid}
             onPress={() => finish("confirmed")}
           />
           <Button
             label={changes ? "Übersicht anzeigen" : "Etwas war anders"}
             secondary
             icon="edit-2"
-            onPress={() => setChanges(!changes)}
+            onPress={() => {
+              if (mode === "detailed" && changes) chooseMode("simple");
+              else setChanges(!changes);
+            }}
           />
           <Button
             label="Nur Training als absolviert speichern"
