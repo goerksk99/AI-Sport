@@ -1,0 +1,14 @@
+node_modules/
+.expo/
+dist/
+web-build/
+playwright-report/
+test-results/
+*.log
+.DS_Store
+/android/
+/ios/
+/artifacts/
+*.apk
+*.aab
+*.keystore

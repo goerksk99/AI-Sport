@@ -1,0 +1,14 @@
+{
+  "expo": {
+    "name": "PULS · Dein Training",
+    "slug": "ai-sport",
+    "scheme": "puls",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "userInterfaceStyle": "dark",
+    "web": { "bundler": "metro", "output": "single", "name": "PULS" },
+    "plugins": ["expo-router"],
+    "ios": { "supportsTablet": true },
+    "android": { "package": "com.aisport.puls" }
+  }
+}
