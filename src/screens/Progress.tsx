@@ -26,7 +26,14 @@ export function Progress() {
     new Set(
       history.flatMap((x) =>
         x.exercises
-          .filter((e) => e.sets.some((s) => s.status === "confirmed"))
+          .filter((e) =>
+            e.sets.some(
+              (s) =>
+                s.status === "confirmed" &&
+                (!exerciseById(e.exerciseId).weighted ||
+                  s.weight !== undefined),
+            ),
+          )
           .map((e) => e.exerciseId),
       ),
     ),
@@ -37,7 +44,14 @@ export function Progress() {
     ? history.flatMap((x) => {
         const sets = x.exercises
           .filter((e) => e.exerciseId === chosen)
-          .flatMap((e) => e.sets.filter((s) => s.status === "confirmed"));
+          .flatMap((e) =>
+            e.sets.filter(
+              (s) =>
+                s.status === "confirmed" &&
+                (!exerciseById(e.exerciseId).weighted ||
+                  s.weight !== undefined),
+            ),
+          );
         return sets.length
           ? [
               {
@@ -98,74 +112,85 @@ export function Progress() {
         </Card>
       ) : (
         <>
-          <Card>
-            <Label>ÜBUNGSENTWICKLUNG</Label>
-            <View style={s.wrap}>
-              {ids.map((id) => (
-                <Chip
-                  key={id}
-                  label={exerciseById(id).name}
-                  selected={chosen === id}
-                  onPress={() => setExercise(id)}
-                />
-              ))}
-            </View>
-            <T style={s.h2}>{ex?.name}</T>
-            <T muted>
-              Bestwert: {Math.max(0, ...values.map((v) => v.value))}{" "}
-              {ex?.weighted
-                ? "kg"
-                : ex?.unit === "seconds"
-                  ? "Sekunden"
-                  : "Wiederholungen"}{" "}
-              pro Satz
-            </T>
-            <View
-              accessibilityLabel="Verlauf bestätigter Bestwerte"
-              style={{
-                flexDirection: "row",
-                alignItems: "flex-end",
-                gap: 12,
-                height: 180,
-                paddingTop: 20,
-              }}
-            >
-              {values.slice(-8).map((v, i) => (
-                <View
-                  key={i}
-                  style={{
-                    flex: 1,
-                    alignItems: "center",
-                    justifyContent: "flex-end",
-                    gap: 5,
-                  }}
-                >
-                  <T style={{ fontSize: 11, color: C.accent }}>{v.value}</T>
-                  <View
-                    style={{
-                      width: "80%",
-                      height: Math.max(3, (v.value / max) * 110),
-                      backgroundColor: C.accent,
-                      borderTopLeftRadius: 7,
-                      borderTopRightRadius: 7,
-                    }}
+          {ids.length > 0 ? (
+            <Card>
+              <Label>ÜBUNGSENTWICKLUNG</Label>
+              <View style={s.wrap}>
+                {ids.map((id) => (
+                  <Chip
+                    key={id}
+                    label={exerciseById(id).name}
+                    selected={chosen === id}
+                    onPress={() => setExercise(id)}
                   />
-                  <T muted style={{ fontSize: 9 }}>
-                    {new Date(v.date).toLocaleDateString("de-DE", {
-                      day: "2-digit",
-                      month: "2-digit",
-                    })}
-                  </T>
-                </View>
-              ))}
-            </View>
-            <T muted style={{ fontSize: 11 }}>
-              Je Einheit der höchste bestätigte Wert. Unterschiedliche
-              Wiederholungen sind nur eingeschränkt vergleichbar. Volumen =
-              externe Last × Wiederholungen; Körpergewicht und Haltezeiten sind
-              ausgenommen.
-            </T>
-          </Card>
+                ))}
+              </View>
+              <T style={s.h2}>{ex?.name}</T>
+              <T muted>
+                Bestwert: {Math.max(0, ...values.map((v) => v.value))}{" "}
+                {ex?.weighted
+                  ? "kg"
+                  : ex?.unit === "seconds"
+                    ? "Sekunden"
+                    : "Wiederholungen"}{" "}
+                pro Satz
+              </T>
+              <View
+                accessibilityLabel="Verlauf bestätigter Bestwerte"
+                style={{
+                  flexDirection: "row",
+                  alignItems: "flex-end",
+                  gap: 12,
+                  height: 180,
+                  paddingTop: 20,
+                }}
+              >
+                {values.slice(-8).map((v, i) => (
+                  <View
+                    key={i}
+                    style={{
+                      flex: 1,
+                      alignItems: "center",
+                      justifyContent: "flex-end",
+                      gap: 5,
+                    }}
+                  >
+                    <T style={{ fontSize: 11, color: C.accent }}>{v.value}</T>
+                    <View
+                      style={{
+                        width: "80%",
+                        height: Math.max(3, (v.value / max) * 110),
+                        backgroundColor: C.accent,
+                        borderTopLeftRadius: 7,
+                        borderTopRightRadius: 7,
+                      }}
+                    />
+                    <T muted style={{ fontSize: 9 }}>
+                      {new Date(v.date).toLocaleDateString("de-DE", {
+                        day: "2-digit",
+                        month: "2-digit",
+                      })}
+                    </T>
+                  </View>
+                ))}
+              </View>
+              <T muted style={{ fontSize: 11 }}>
+                Je Einheit der höchste bestätigte Wert. Unterschiedliche
+                Wiederholungen sind nur eingeschränkt vergleichbar. Volumen =
+                externe Last × Wiederholungen; Körpergewicht und Haltezeiten
+                sind ausgenommen.
+              </T>
+            </Card>
+          ) : (
+            <Card>
+              <T style={s.h2}>Dein Rhythmus wird sichtbar.</T>
+              <T muted>
+                Deine Einheiten zählen bereits. Für Leistungsdiagramme fehlen
+                bestätigte Einzelwerte. Nach Plan angenommene Werte erzeugen
+                keine Rekorde.
+              </T>
+            </Card>
+          )}
           <T style={s.h2}>Trainingshistorie</T>
           {[...history].reverse().map((x) => (
             <SessionRow key={x.id} id={x.id} />

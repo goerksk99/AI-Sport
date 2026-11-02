@@ -23,8 +23,13 @@ export function SessionRow({ id }: { id: string }) {
             <T style={{ fontWeight: "700" }}>{x.name}</T>
             <T muted style={{ fontSize: 12 }}>
               {new Date(r.date).toLocaleDateString("de-DE")} · {r.sets} Sätze ·{" "}
-              {r.durationMinutes} Min. · {r.volume.toLocaleString("de-DE")} kg
-              Volumen
+              {r.durationMinutes === null
+                ? "Dauer unbekannt"
+                : r.durationMinutes + " Min."}{" "}
+              · {r.volume.toLocaleString("de-DE")} kg bestätigtes Volumen
+              {r.assumedSets > 0
+                ? ` · ${r.assumedSets} Sätze nach Plan angenommen`
+                : ""}
             </T>
           </View>
           <Icon name="arrow-up-right" color={C.muted} />

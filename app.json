@@ -3,7 +3,7 @@
     "name": "PULS · Dein Training",
     "slug": "ai-sport",
     "scheme": "puls",
-    "version": "1.0.0",
+    "version": "1.1.0",
     "orientation": "portrait",
     "userInterfaceStyle": "dark",
     "web": {
@@ -11,9 +11,7 @@
       "output": "single",
       "name": "PULS"
     },
-    "plugins": [
-      "expo-router"
-    ],
+    "plugins": ["expo-router"],
     "ios": {
       "supportsTablet": true
     },
@@ -24,7 +22,8 @@
         "android.permission.READ_EXTERNAL_STORAGE",
         "android.permission.WRITE_EXTERNAL_STORAGE",
         "android.permission.SYSTEM_ALERT_WINDOW"
-      ]
+      ],
+      "versionCode": 2
     }
   }
 }

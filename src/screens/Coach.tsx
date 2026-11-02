@@ -15,15 +15,61 @@ import {
 } from "../components/ui";
 import { Heading } from "./Heading";
 export function Coach() {
-  const { data } = useStore();
+  const { data, update } = useStore();
   const [q, setQ] = useState("");
   const [messages, setMessages] = useState<{ q: string; a: string }[]>([]);
-  const rec = demoCoach.recommend(data.sessions)[0];
+  const relevant = data.sessions.filter(
+    (s) =>
+      (s.trainingStyle || "strength") ===
+      (data.profile?.trainingStyle || "strength"),
+  );
+  const rec = demoCoach.recommend(relevant)[0];
+  const adjustment = rec.adjustment;
+  const matches =
+    data.plan?.workouts
+      .flatMap((w) => w.exercises)
+      .filter((e) => e.exerciseId === adjustment?.exerciseId) || [];
+  const already =
+    !!adjustment &&
+    matches.length > 0 &&
+    matches.every((e) =>
+      e.sets.every(
+        (s) =>
+          (adjustment.kind === "reps" ? s.reps : (s.weight ?? 0)) >=
+          adjustment.value,
+      ),
+    );
+  function adopt() {
+    if (!adjustment) return;
+    update((d) => ({
+      ...d,
+      plan: {
+        ...d.plan!,
+        workouts: d.plan!.workouts.map((w) => ({
+          ...w,
+          exercises: w.exercises.map((e) =>
+            e.exerciseId === adjustment.exerciseId
+              ? {
+                  ...e,
+                  editedAt: new Date().toISOString(),
+                  sets: e.sets.map((s) => ({
+                    ...s,
+                    ...(adjustment.kind === "reps"
+                      ? { reps: adjustment.value }
+                      : { weight: adjustment.value }),
+                  })),
+                }
+              : e,
+          ),
+        })),
+      },
+    }));
+  }
   const ask = (text: string) => {
     if (!text.trim()) return;
     setMessages((m) => [
       ...m,
-      { q: text.trim(), a: demoCoach.answer(text, data.sessions) },
+      { q: text.trim(), a: demoCoach.answer(text, relevant) },
     ]);
     setQ("");
   };
@@ -52,6 +98,24 @@ export function Coach() {
         <Icon name="zap" color={C.accent} size={30} />
         <T style={s.h2}>{rec.title}</T>
         <T>{rec.message}</T>
+        {adjustment && matches.length > 0 && (
+          <>
+            <Button
+              label={
+                already
+                  ? "Im Plan übernommen"
+                  : "Vorschlag für nächste Trainings übernehmen"
+              }
+              disabled={already}
+              onPress={adopt}
+            />
+            <T muted style={{ fontSize: 12 }}>
+              Nur dein zukünftiger Plan ändert sich. Laufendes Training und
+              gespeicherte Leistungen bleiben erhalten. Wähle die
+              nächstmögliche, kontrolliert ausführbare Last.
+            </T>
+          </>
+        )}
         <View
           style={{
             backgroundColor: C.bg,

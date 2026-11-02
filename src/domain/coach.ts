@@ -29,6 +29,11 @@ export const demoCoach: CoachService = {
     for (const latest of sessions[0].exercises) {
       const ex = exerciseById(latest.exerciseId);
       const recent = sessions
+        .filter(
+          (s) =>
+            (s.trainingStyle || "strength") ===
+            (sessions[0].trainingStyle || "strength"),
+        )
         .flatMap((s) => s.exercises.filter((e) => e.exerciseId === ex.id))
         .slice(0, COACH_RULES.successfulSessions);
       const misses = recent.filter((e) =>
@@ -85,6 +90,17 @@ export const demoCoach: CoachService = {
         return [
           {
             id: "grow",
+            adjustment:
+              new Set(recent[0].sets.map((s) => s.weight)).size === 1
+                ? {
+                    exerciseId: ex.id,
+                    kind: "weight",
+                    value: Math.min(
+                      1000,
+                      Math.round(recent[0].sets[0].weight! * 1.025 * 4) / 4,
+                    ),
+                  }
+                : undefined,
             title: `${ex.name}: Ein kleiner nächster Schritt?`,
             message: `Du hast bei dieser Übung zweimal alle Planwerte bei gleicher Last bestätigt. Bei guter Technik kannst du etwa ${COACH_RULES.incrementPercent} % mehr Gewicht prüfen. Es wird nichts automatisch erhöht.`,
             reason:
@@ -92,6 +108,44 @@ export const demoCoach: CoachService = {
             tone: "positive",
           },
         ];
+      const repeatedBody =
+        !ex.weighted &&
+        recent.length === 2 &&
+        recent[0].sets.length === recent[1].sets.length &&
+        recent.every(
+          (e) =>
+            e.sets.length > 0 &&
+            e.sets.every(
+              (s) =>
+                s.status === "confirmed" &&
+                s.reps >=
+                  (e.plannedSets.find((p) => p.id === s.plannedSetId)?.reps ??
+                    Infinity),
+            ),
+        );
+      if (repeatedBody) {
+        const current = Math.min(...recent[0].sets.map((s) => s.reps));
+        const limit = ex.unit === "seconds" ? 120 : 20;
+        if (current < limit)
+          return [
+            {
+              id: "body-progress",
+              title: `${ex.name}: Ein kleiner nächster Schritt?`,
+              message: `Du hast die Zielwerte dieser Übung zweimal vollständig bestätigt. Du kannst ${ex.unit === "seconds" ? "fünf Sekunden länger halten" : "eine zusätzliche saubere Wiederholung"} prüfen. Die Übungsvariante soll weiterhin kontrolliert ausführbar bleiben.`,
+              reason:
+                "Zwei vollständig bestätigte Übungsleistungen. Keine angenommenen Werte und kein Maximalkrafttest.",
+              tone: "positive",
+              adjustment: {
+                exerciseId: ex.id,
+                kind: "reps",
+                value: Math.min(
+                  limit,
+                  current + (ex.unit === "seconds" ? 5 : 1),
+                ),
+              },
+            },
+          ];
+      }
     }
     return [
       {

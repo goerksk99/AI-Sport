@@ -1,5 +1,16 @@
 export type FitnessGoal = "fit" | "muscle" | "lose" | "performance";
-export type Equipment = "body" | "dumbbell" | "gym";
+export type Equipment = "body" | "dumbbell" | "gym" | "barbell" | "pullup";
+export type TrainingStyle = "strength" | "endurance" | "calisthenics" | "mixed";
+export type DocumentationMode = "simple" | "quick" | "detailed";
+export type SelfAssessment = {
+  exerciseId: string;
+  weight?: number;
+  setsMin: number;
+  setsMax: number;
+  repsMin: number;
+  repsMax: number;
+  updatedAt: string;
+};
 export type UserProfile = {
   id: string;
   createdAt: string;
@@ -13,6 +24,8 @@ export type UserProfile = {
   preferences: ("strength" | "cardio")[];
   weight?: number;
   limitations?: string;
+  trainingStyle?: TrainingStyle;
+  assessments?: SelfAssessment[];
 };
 export type Exercise = {
   id: string;
@@ -31,6 +44,8 @@ export type PlannedExercise = {
   exerciseId: string;
   sets: PlannedSet[];
   restSeconds: number;
+  editedAt?: string;
+  source?: "plan" | "assessment" | "history";
 };
 export type PlannedWorkout = {
   id: string;
@@ -39,6 +54,7 @@ export type PlannedWorkout = {
   exercises: PlannedExercise[];
 };
 export type WorkoutPlan = {
+  trainingStyle?: TrainingStyle;
   id: string;
   profileId: string;
   createdAt: string;
@@ -50,17 +66,20 @@ export type PerformedSet = {
   plannedSetId: string;
   reps: number;
   weight?: number;
-  status: "pending" | "confirmed" | "skipped";
+  status: "pending" | "confirmed" | "skipped" | "assumed";
   confirmedAt?: string;
 };
 export type ExercisePerformance = {
+  editDraft?: { count: string; reps: string; weight: string };
   id: string;
   exerciseId: string;
   plannedSets: PlannedSet[];
   sets: PerformedSet[];
   restSeconds: number;
+  source?: "plan" | "assessment" | "history";
 };
 export type WorkoutSession = {
+  trainingStyle?: TrainingStyle;
   id: string;
   planId: string;
   workoutId: string;
@@ -68,7 +87,11 @@ export type WorkoutSession = {
   startedAt: string;
   completedAt?: string;
   updatedAt: string;
+  performanceUpdatedAt?: string;
   restEndsAt?: string;
+  documentationMode?: DocumentationMode;
+  durationUnknown?: boolean;
+  enteredDurationMinutes?: number;
   status: "draft" | "completed";
   exercises: ExercisePerformance[];
 };
@@ -77,7 +100,8 @@ export type ProgressRecord = {
   date: string;
   volume: number;
   sets: number;
-  durationMinutes: number;
+  durationMinutes: number | null;
+  assumedSets: number;
 };
 export type CoachRecommendation = {
   id: string;
@@ -85,6 +109,7 @@ export type CoachRecommendation = {
   message: string;
   reason: string;
   tone: "neutral" | "positive";
+  adjustment?: { exerciseId: string; kind: "reps" | "weight"; value: number };
 };
 export type AppData = {
   version: 1;

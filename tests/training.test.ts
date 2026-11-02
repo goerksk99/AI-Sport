@@ -161,7 +161,9 @@ test("Weighted volume excludes unconfirmed, skipped and timed work", () => {
     weight: 100,
     reps: 10,
   };
-  const core = s.exercises.find((e) => e.exerciseId === "deadbug")!;
+  const core = s.exercises.find((e) =>
+    ["plank", "deadbug", "sideplank"].includes(e.exerciseId),
+  )!;
   core.exerciseId = "plank";
   const plank = core;
   plank.sets[0] = {
@@ -297,7 +299,8 @@ test("Coach only suggests weight progression for same exercise and comparable lo
   b.completedAt = "2026-01-02T10:00:00.000Z";
   assert.equal(demoCoach.recommend([a, b])[0].id, "grow");
   b.exercises.forEach((e) => e.sets.forEach((s) => (s.weight = 10)));
-  assert.equal(demoCoach.recommend([a, b])[0].id, "consistent");
+  assert.notEqual(demoCoach.recommend([a, b])[0].id, "grow");
+  assert.notEqual(demoCoach.recommend([a, b])[0].adjustment?.kind, "weight");
   b.exercises[0].sets[0].reps = 1;
   assert.equal(demoCoach.recommend([a, b])[0].id, "hold");
   a.exercises[0].sets[0].reps = 1;

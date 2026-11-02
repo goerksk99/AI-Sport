@@ -3,9 +3,12 @@ import { View } from "react-native";
 import { useStore } from "../storage/store";
 import { Onboarding, goals } from "../components/Onboarding";
 import { Button, Card, Label, T, C, styles as s } from "../components/ui";
+import { trainingStyles } from "../domain/preferences";
+import { Assessments } from "../components/Assessments";
+import { generatePlan } from "../domain/training";
 import { Heading } from "./Heading";
 export function Profile() {
-  const { data } = useStore();
+  const { data, update } = useStore();
   const [edit, setEdit] = useState(false);
   if (edit) return <Onboarding editing onDone={() => setEdit(false)} />;
   const p = data.profile!;
@@ -39,6 +42,7 @@ export function Profile() {
         </View>
         {[
           ["Dein Ziel", goals[p.goal]],
+          ["Trainingsart", trainingStyles[p.trainingStyle || "strength"]],
           [
             "Trainingsniveau",
             p.level === "beginner" ? "Einsteiger" : "Fortgeschritten",
@@ -53,7 +57,11 @@ export function Profile() {
                   ? "Studiogeräte"
                   : e === "body"
                     ? "Körpergewicht"
-                    : "Kurzhanteln",
+                    : e === "barbell"
+                      ? "Langhantel & Hantelbank"
+                      : e === "pullup"
+                        ? "Klimmzugstange"
+                        : "Kurzhanteln",
               )
               .join(", "),
           ],
@@ -86,6 +94,22 @@ export function Profile() {
         />
       </Card>
       <Card>
+        <Assessments
+          profile={p}
+          value={p.assessments || []}
+          onChange={(assessments) =>
+            update((d) => {
+              const profile = { ...d.profile!, assessments };
+              return { ...d, profile, plan: generatePlan(profile) };
+            })
+          }
+        />
+        <T muted style={{ fontSize: 12 }}>
+          Neue Ausgangswerte erstellen einen passenden Plan. Historie und
+          laufendes Training bleiben erhalten.
+        </T>
+      </Card>
+      <Card>
         <Label>ERNÄHRUNG · AUSBLICK</Label>
         <T style={s.h2}>Mehr als Training.</T>
         <T muted>
@@ -94,7 +118,7 @@ export function Profile() {
         </T>
       </Card>
       <T muted style={{ fontSize: 12 }}>
-        PULS · Prototyp 1.0. Daten sind lokal und nicht verschlüsselt. Das
+        PULS · Prototyp 1.1. Daten sind lokal und nicht verschlüsselt. Das
         Löschen von App- oder Browserdaten entfernt auch deine Trainings. Keine
         Cloud-Synchronisierung.
       </T>

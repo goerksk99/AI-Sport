@@ -7,7 +7,9 @@ import {
   plannedExercise,
   startSession,
   targetRange,
+  exerciseSummary,
 } from "../domain/training";
+import { effortHint } from "../domain/preferences";
 import { exerciseById } from "../data/exercises";
 import { goals } from "../components/Onboarding";
 import { Button, Card, Chip, Icon, T, C, styles as s } from "../components/ui";
@@ -30,7 +32,9 @@ export function Training() {
             : {
                 ...x,
                 exercises: x.exercises.map((e) =>
-                  e.id === id ? { ...e, ...patch } : e,
+                  e.id === id
+                    ? { ...e, ...patch, editedAt: new Date().toISOString() }
+                    : e,
                 ),
               },
         ),
@@ -85,6 +89,20 @@ export function Training() {
           }}
         />
       </View>
+      {!data.draft && (
+        <Button
+          label="Dieses Training nachtragen"
+          secondary
+          onPress={() => {
+            update((d) => ({
+              ...d,
+              draft: startSession(d.plan!, w.id, d.sessions, { posthoc: true }),
+            }));
+            router.push("/session");
+          }}
+        />
+      )}
+      <T muted>{effortHint(p.trainingStyle)}</T>
       {w.exercises.map((pe, index) => {
         const e = exerciseById(pe.exerciseId);
         return (
@@ -112,7 +130,11 @@ export function Training() {
                     ? "Körpergewicht"
                     : e.equipment === "gym"
                       ? "Studiogerät"
-                      : "Kurzhantel"}
+                      : e.equipment === "barbell"
+                        ? "Langhantel & Hantelbank"
+                        : e.equipment === "pullup"
+                          ? "Klimmzugstange"
+                          : "Kurzhantel"}
                 </T>
               </View>
               <Button
@@ -189,6 +211,14 @@ export function Training() {
                 }
               />
             </View>
+            {pe.source === "assessment" && (
+              <T style={{ color: C.accent, fontSize: 12 }}>
+                Vorschlag aus deiner Selbsteinschätzung
+                {pe.sets[0].weight !== undefined
+                  ? ` · ${pe.sets[0].weight} kg`
+                  : ""}
+              </T>
+            )}
             {e.weighted && (
               <T muted style={{ fontSize: 12 }}>
                 Last beim Training frei wählen. Bestätigte letzte Werte werden

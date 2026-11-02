@@ -19,6 +19,11 @@ function performance(v: unknown): boolean {
     !object(v) ||
     !text(v.id) ||
     !exerciseId(v.exerciseId) ||
+    (v.editDraft !== undefined &&
+      (!object(v.editDraft) ||
+        ![v.editDraft.count, v.editDraft.reps, v.editDraft.weight].every(
+          (x) => typeof x === "string" && x.length <= 32,
+        ))) ||
     !positive(v.restSeconds) ||
     !Array.isArray(v.plannedSets) ||
     !v.plannedSets.length ||
@@ -37,7 +42,9 @@ function performance(v: unknown): boolean {
       plannedIds.has(s.plannedSetId) &&
       positive(s.reps) &&
       weight(s.weight) &&
-      ["pending", "confirmed", "skipped"].includes(s.status as string),
+      ["pending", "confirmed", "skipped", "assumed"].includes(
+        s.status as string,
+      ),
   );
 }
 function session(v: unknown, status: "draft" | "completed"): boolean {
@@ -49,7 +56,22 @@ function session(v: unknown, status: "draft" | "completed"): boolean {
     text(v.name) &&
     time(v.startedAt) &&
     time(v.updatedAt) &&
+    (v.performanceUpdatedAt === undefined || time(v.performanceUpdatedAt)) &&
     v.status === status &&
+    (v.trainingStyle === undefined ||
+      ["strength", "endurance", "calisthenics", "mixed"].includes(
+        v.trainingStyle as string,
+      )) &&
+    (v.documentationMode === undefined ||
+      ["simple", "quick", "detailed"].includes(
+        v.documentationMode as string,
+      )) &&
+    (v.durationUnknown === undefined ||
+      typeof v.durationUnknown === "boolean") &&
+    (v.enteredDurationMinutes === undefined ||
+      (typeof v.enteredDurationMinutes === "number" &&
+        v.enteredDurationMinutes > 0 &&
+        v.enteredDurationMinutes <= 1440)) &&
     (status === "draft" || time(v.completedAt)) &&
     (v.restEndsAt === undefined || time(v.restEndsAt)) &&
     Array.isArray(v.exercises) &&
@@ -93,10 +115,34 @@ export function parseData(raw: string): AppData {
     !["home", "gym"].includes(p.location as string) ||
     !Array.isArray(p.equipment) ||
     !p.equipment.includes("body") ||
-    !p.equipment.every((x) => ["body", "dumbbell", "gym"].includes(x)) ||
+    !p.equipment.every((x) =>
+      ["body", "dumbbell", "gym", "barbell", "pullup"].includes(x),
+    ) ||
     !Array.isArray(p.preferences) ||
     !p.preferences.includes("strength") ||
     !p.preferences.every((x) => ["strength", "cardio"].includes(x)) ||
+    (p.trainingStyle !== undefined &&
+      !["strength", "endurance", "calisthenics", "mixed"].includes(
+        p.trainingStyle as string,
+      )) ||
+    (p.assessments !== undefined &&
+      (!Array.isArray(p.assessments) ||
+        new Set(p.assessments.map((a) => (object(a) ? a.exerciseId : null)))
+          .size !== p.assessments.length ||
+        !p.assessments.every(
+          (a) =>
+            object(a) &&
+            exerciseId(a.exerciseId) &&
+            weight(a.weight) &&
+            positive(a.setsMin) &&
+            positive(a.setsMax) &&
+            Number(a.setsMin) <= Number(a.setsMax) &&
+            Number(a.setsMax) <= 8 &&
+            positive(a.repsMin) &&
+            positive(a.repsMax) &&
+            Number(a.repsMin) <= Number(a.repsMax) &&
+            time(a.updatedAt),
+        ))) ||
     !weight(p.weight) ||
     (p.limitations !== undefined && typeof p.limitations !== "string")
   )
@@ -105,6 +151,10 @@ export function parseData(raw: string): AppData {
     !object(plan) ||
     !text(plan.id) ||
     plan.profileId !== p.id ||
+    (plan.trainingStyle !== undefined &&
+      !["strength", "endurance", "calisthenics", "mixed"].includes(
+        plan.trainingStyle as string,
+      )) ||
     !time(plan.createdAt) ||
     typeof plan.rationale !== "string" ||
     !Array.isArray(plan.workouts) ||
@@ -125,6 +175,7 @@ export function parseData(raw: string): AppData {
             text(e.id) &&
             exerciseId(e.exerciseId) &&
             positive(e.restSeconds) &&
+            (e.editedAt === undefined || time(e.editedAt)) &&
             Array.isArray(e.sets) &&
             e.sets.length > 0 &&
             e.sets.every(plannedSet) &&

@@ -180,6 +180,78 @@ export const exercises: Exercise[] = [
     unit: "seconds",
     weighted: false,
   },
+  {
+    id: "barbell-bench",
+    name: "Langhantel-Bankdrücken",
+    muscles: ["Brust", "Trizeps"],
+    equipment: "barbell",
+    difficulty: "beginner",
+    movement: "push",
+    instruction:
+      "Auf einer geeigneten Hantelbank mit Sicherheitsablagen trainieren. Füße stabil setzen, Schulterblätter halten und die Hantel kontrolliert führen. Last bei Bedarf mit Sicherungsperson wählen.",
+    unit: "reps",
+    weighted: true,
+  },
+  {
+    id: "incline-pushup",
+    name: "Erhöhte Liegestütze",
+    muscles: ["Brust", "Trizeps"],
+    equipment: "body",
+    difficulty: "beginner",
+    movement: "push",
+    instruction:
+      "Hände auf eine stabile, dafür geeignete feste Fläche setzen. Körper gerade halten. Je höher die Hände, desto leichter die Variante.",
+    unit: "reps",
+    weighted: false,
+  },
+  {
+    id: "pike",
+    name: "Pike Push-ups",
+    muscles: ["Schultern", "Trizeps"],
+    equipment: "body",
+    difficulty: "advanced",
+    movement: "push",
+    instruction:
+      "Hüfte hoch halten und Kopf kontrolliert zwischen den Händen absenken. Nur schmerzfrei und mit stabiler Schulter ausführen; sonst Liegestütze wählen.",
+    unit: "reps",
+    weighted: false,
+  },
+  {
+    id: "pullup",
+    name: "Klimmzüge",
+    muscles: ["Rücken", "Bizeps"],
+    equipment: "pullup",
+    difficulty: "advanced",
+    movement: "pull",
+    instruction:
+      "Nur an einer sicher montierten Klimmzugstange trainieren. Ohne Schwung kontrolliert hochziehen und absenken. Falls nicht sauber möglich, Rückenheben mit Armzug wählen.",
+    unit: "reps",
+    weighted: false,
+  },
+  {
+    id: "split-squat",
+    name: "Split Squat",
+    muscles: ["Beine", "Gesäß"],
+    equipment: "body",
+    difficulty: "beginner",
+    movement: "squat",
+    instruction:
+      "Im stabilen Ausfallschritt den Körper senkrecht absenken und wieder aufrichten. Wiederholungen gelten je Seite. Mit kontrollierter Tiefe beginnen.",
+    unit: "reps",
+    weighted: false,
+  },
+  {
+    id: "sideplank",
+    name: "Seitstütz",
+    muscles: ["Core"],
+    equipment: "body",
+    difficulty: "beginner",
+    movement: "core",
+    instruction:
+      "Unterarm unter die Schulter setzen, Hüfte anheben und ruhig atmen. Zeit gilt je Seite. Als leichtere Variante die Knie ablegen.",
+    unit: "seconds",
+    weighted: false,
+  },
 ];
 export const exerciseById = (id: string) => {
   const e = exercises.find((x) => x.id === id);

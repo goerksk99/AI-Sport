@@ -19,7 +19,12 @@ export function Today() {
         plan.workouts.length
     ];
   const total = data.sessions.reduce((n, x) => n + record(x).sets, 0);
-  const rec = demoCoach.recommend(data.sessions)[0];
+  const rec = demoCoach.recommend(
+    data.sessions.filter(
+      (s) =>
+        (s.trainingStyle || "strength") === (p.trainingStyle || "strength"),
+    ),
+  )[0];
   const now = new Date();
   const monday = new Date(now);
   monday.setHours(0, 0, 0, 0);
@@ -159,8 +164,23 @@ export function Today() {
               icon="play"
               onPress={start}
             />
+            {!data.draft && (
+              <Button
+                label="Schon trainiert? Jetzt eintragen"
+                secondary
+                onPress={() => {
+                  update((d) => ({
+                    ...d,
+                    draft: startSession(plan, next.id, d.sessions, {
+                      posthoc: true,
+                    }),
+                  }));
+                  router.push("/session");
+                }}
+              />
+            )}
             <T style={{ fontSize: 11, textAlign: "center", color: "#A8BD9A" }}>
-              Live dokumentieren oder später nachtragen. Du entscheidest.
+              Handy weglegen. Danach mit einer Aktion abschließen.
             </T>
           </Card>
           <View style={s.row}>

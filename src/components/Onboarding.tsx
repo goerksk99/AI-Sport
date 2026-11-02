@@ -1,6 +1,12 @@
 import React, { useState } from "react";
 import { ScrollView, View } from "react-native";
-import { UserProfile, FitnessGoal, Equipment } from "../domain/types";
+import {
+  UserProfile,
+  FitnessGoal,
+  Equipment,
+  TrainingStyle,
+  SelfAssessment,
+} from "../domain/types";
 import { generatePlan, uid } from "../domain/training";
 import { useStore } from "../storage/store";
 import {
@@ -14,6 +20,8 @@ import {
   C,
   styles as s,
 } from "./ui";
+import { Assessments } from "./Assessments";
+import { trainingStyles } from "../domain/preferences";
 export const goals: Record<FitnessGoal, string> = {
   fit: "Fitter im Alltag",
   muscle: "Muskeln aufbauen",
@@ -48,6 +56,12 @@ export function Onboarding({
   );
   const [weight, setWeight] = useState(old?.weight?.toString() || "");
   const [limitations, setLimitations] = useState(old?.limitations || "");
+  const [trainingStyle, setTrainingStyle] = useState<TrainingStyle>(
+    old?.trainingStyle || "strength",
+  );
+  const [assessments, setAssessments] = useState<SelfAssessment[]>(
+    old?.assessments || [],
+  );
   const [error, setError] = useState("");
   function finish() {
     const w = weight.trim() ? Number(weight.replace(",", ".")) : undefined;
@@ -70,6 +84,8 @@ export function Onboarding({
       preferences: cardio ? ["strength", "cardio"] : ["strength"],
       weight: w,
       limitations: limitations.trim() || undefined,
+      trainingStyle,
+      assessments,
     };
     update((d) => ({ ...d, profile: p, plan: generatePlan(p) }));
     onDone?.();
@@ -231,9 +247,39 @@ export function Onboarding({
               />
             )}
           </View>
-          <Label>TRAININGSARTEN</Label>
+          <Label>DEINE TRAININGSART</Label>
           <View style={s.wrap}>
-            <T>Kraft & Stabilität sind die Basis.</T>
+            {Object.entries(trainingStyles).map(([v, l]) => (
+              <Chip
+                key={v}
+                label={l}
+                selected={trainingStyle === v}
+                onPress={() => setTrainingStyle(v as TrainingStyle)}
+              />
+            ))}
+          </View>
+          <View style={s.wrap}>
+            {(
+              [
+                { v: "barbell", l: "Langhantel & Hantelbank" },
+                { v: "pullup", l: "Klimmzugstange" },
+              ] as const
+            ).map((x) => (
+              <Chip
+                key={x.v}
+                label={x.l}
+                selected={equipment.includes(x.v)}
+                onPress={() =>
+                  setEquipment((a) =>
+                    a.includes(x.v) ? a.filter((e) => e !== x.v) : [...a, x.v],
+                  )
+                }
+              />
+            ))}
+          </View>
+          <Label>OPTIONAL ERGÄNZEN</Label>
+          <View style={s.wrap}>
+            <T muted>Zusätzliche lockere Ausdauer</T>
             <Chip
               label="+ Ausdauer einplanen"
               selected={cardio}
@@ -255,9 +301,27 @@ export function Onboarding({
               {level === "advanced" && days >= 4
                 ? "Ober-/Unterkörper-Split"
                 : "Ganzkörper mit Grundbewegungen"}{" "}
-              · {cardio ? "mit Ausdauer" : "Kraft & Stabilität"}
+              · {trainingStyles[trainingStyle]}
+              {cardio ? " + Ausdauer" : ""}
             </T>
           </Card>
+          <Assessments
+            profile={{
+              id: old?.id || "preview",
+              createdAt: old?.createdAt || new Date().toISOString(),
+              name: name || "Sportler",
+              goal,
+              level,
+              days,
+              minutes,
+              location,
+              equipment,
+              preferences: ["strength"],
+              trainingStyle,
+            }}
+            value={assessments}
+            onChange={setAssessments}
+          />
           <Label>FREIWILLIG · EINFACH LEER LASSEN</Label>
           <Field
             label="Körpergewicht in kg (optional)"
